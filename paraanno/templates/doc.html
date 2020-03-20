@@ -9,39 +9,67 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
     <title>Para-anno</title>
+
+    <style>
+      span.matched {color:darkgrey};
+    </style>
+    
   </head>
   <body>
-    <h1>{{user}}/{{docpair}}</h1>
+
 
     <div class="container">
 
+	<ol class="breadcrumb">
+	  <li class="breadcrumb-item"><a href="/ann/{{user}}">{{user}}</a></li>
+	  <li class="breadcrumb-item"><a href="/ann/{{user}}/{{batchfile}}">{{batchfile}}</a></li>
+	  <li class="breadcrumb-item active"><a href="/ann/{{user}}/{{batchfile}}/{{pairseq}}">{{pairseq}}</a></li>
+	</ol>
+
+      
       <div class="row">
 	<div class="col-4 p-1">
-	  <button type="button" class="btn btn-sm btn-dark" id="prevdoc"><span class="fa fa-chevron-left"/></button>&nbsp;
-	  <button type="button" class="btn btn-sm btn-dark" id="nextdoc"><span class="fa fa-chevron-right"/></button>&nbsp;
+	  <a type="button" class="btn btn-sm btn-dark" id="prevdoc" href="/ann/{{user}}/{{batchfile}}/{{pairseq-1}}"><span class="fa fa-chevron-left"/></a>&nbsp;
+	  <a type="button" class="btn btn-sm btn-dark" id="nextdoc" href="/ann/{{user}}/{{batchfile}}/{{pairseq+1}}"><span class="fa fa-chevron-right"/></a>&nbsp;
 	  <button type="button" class="btn btn-sm btn-dark" id="save">Save</button>
+	</div>
+	<div class="col-6 p-1">
+	  Hide: short&nbsp;<input type="range" class="custom-range" val="{{mlenv}}" id="matchlencutoff" min="{{min_mlen}}" max="{{max_mlen}}" step="1">&nbsp;long
 	</div>
       </div>
       
       <div class="row">
 	<div class="col-6 p-1 border" style="height:50vh;max-height:50vh;overflow-y:scroll;" id="text-left">
-	  Left <span style="color:red">text</span>
+	  {% for txt, spanclass in left_spandata %}<span class="matchspan" mlen="{{spanclass}}">{{txt}}</span>{% endfor %}
 	</div>
 	
 	<div class="col-6 p-1 border" style="height:50vh;max-height:50vh;overflow-y:scroll;" id="text-right">
-	  Right text
+	  {% for txt, spanclass in right_spandata %}<span class="matchspan" mlen="{{spanclass}}">{{txt}}</span>{% endfor %}
 	</div>
 
       </div> <!-- row-->
 
       <div class="row border">
 	<div class="col-1 p-1">
-	  <a href="#" id="pluspair"><span class="fa fa-plus-circle spanadd" /></a>
+	  <a href="#" id="plusann"><span class="fa fa-plus-circle" /></a>
 	</div>
       </div>
 
       <div class="row border" style="max-height:40vh;overflow-y:scroll">
 	<div class="col-12 container" id="annotations">
+
+	  {% for ann in annotation %}
+	  <div class="row border oneann">
+	    <div class="col-1">
+	      <a href="#" class="killann"> <span class="fa fa-trash-o" /> </a> &nbsp; &nbsp; 
+	      <a href="#" class="dupeann"> <span class="fa fa-files-o" /> </a>
+	    </div>
+           
+	    <div class="col-11 p-1">
+	      <textarea class="anntext" style="width:100%;">{{ ann.txt }}</textarea>
+	    </div>
+	  </div>`
+	  {% endfor %}
 
 	  <!-- here go the annotations! -->
 	  
@@ -51,11 +79,13 @@
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
     <script>
+
+      localStorage.setItem('docpairpath', '{{user}}/{{batchfile}}/{{pairseq}}');
 
       function dirty() {
 	  $("#prevdoc").addClass("disabled");
@@ -72,52 +102,79 @@
 	  
       function get_all_data() {
 	  var anns=[];
-	  $.each($(".onepair"), function (i,e) {
-	      anns.push({"txt":$("#pairtext",$(this)).val()});
+	  $.each($(".oneann"), function (i,e) {
+	      anns.push({"txt":$(".anntext",$(this)).val()});
 	  }
 		);
 	  return anns;
       }
 
       function save_data() {
-	  console.log("clean");
+	  var all_data=get_all_data();
+	  var docpairpath = localStorage.getItem('docpairpath');
+	  $.ajax({type: 'POST',
+		  url: "/saveann/"+docpairpath,
+		  data: JSON.stringify(all_data),
+		  dataType: 'json',
+		  contentType: 'application/json'
+		 }
+	  );
+	      
 	  clean();
       }
+
+      function hide_match_cutoff(n) {
+	  $.each($(".matchspan"), function(i,e) {
+	      if (parseInt($(this).attr("mlen"))<n) {
+		  $(this).removeClass("matched");
+	      }
+	      else {
+		  $(this).addClass("matched");
+	      }
+	  });
+      }
       
-      function new_empty_pair() {
+      function new_empty_ann() {
 	  elem=`
-          <div class="row border onepair">
+          <div class="row border oneann">
 	    <div class="col-1">
-	      <a href="#" class="killpair"> <span class="fa fa-trash-o" /> </a> &nbsp; &nbsp; 
-	      <a href="#" class="dupepair"> <span class="fa fa-files-o" /> </a>
+	      <a href="#" class="killann"> <span class="fa fa-trash-o" /> </a> &nbsp; &nbsp; 
+	      <a href="#" class="dupeann"> <span class="fa fa-files-o" /> </a>
 	    </div>
            
 	    <div class="col-11 p-1">
-	      <textarea id="pairtext" style="width:100%;"></textarea>
+	      <textarea class="anntext" style="width:100%;"></textarea>
 	    </div>
 	  </div>`
 
 	  $(elem).prependTo($("#annotations"));
       }
 
-      function dupe_pair() {
+      function dupe_ann() {
 	  $(this).parent().parent().clone().insertBefore($(this).parent().parent());
+	  dirty();
       }
       
-      function kill_pair() {
+      function kill_ann() {
 	  $(this).parent().parent().remove();
+	  dirty();
       }
 
       $(document).ready(
 	  function() {
-	      $("#pluspair").on("click", new_empty_pair);
+	      $("#plusann").on("click", new_empty_ann);
+	      $("#matchlencutoff").on("input",function(){
+		  hide_match_cutoff($(this).val());
+              });
+	      $("#matchlencutoff").trigger("input");
+	      $("#save").on("click",save_data);
 	  }
       );
 
-      $(document).on("click",".killpair", kill_pair);
-      $(document).on("click",".dupepair", dupe_pair);
-      $(document).on("input","#pairtext",dirty);
-      $("#save").on("click",save_data);
+      $(document).on("click",".killann", kill_ann);
+      $(document).on("click",".dupeann", dupe_ann);
+      $(document).on("input",".anntext",dirty);
+
       </script>
 
     
