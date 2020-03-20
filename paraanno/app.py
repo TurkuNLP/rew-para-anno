@@ -6,6 +6,7 @@ from sqlitedict import SqliteDict
 import json
 import datetime
 import difflib
+import html
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -21,7 +22,7 @@ def matches(s1,s2,minlen=5):
 
 def matches_r(m,s1,s2,min_len,s1_beg,s1_end,s2_beg,s2_end):
     lm=m.find_longest_match(s1_beg,s1_end,s2_beg,s2_end)
-    with open("log.txt","a") as f:
+    #with open("log.txt","a") as f:
         #print(">>>> CHECKED",file=f)
         #print(s1[s1_beg:s1_end],file=f)
         #print("---",file=f)
@@ -66,7 +67,7 @@ def build_spans(s,blocks):
         if not spandata or spandata[-1][1]!=matched_len: #first or span with opposite match polarity -> must make new!
             spandata.append(([],matched_len))
         spandata[-1][0].append(c)
-    merged_spans=[("".join(chars),matched_len) for chars,matched_len in spandata]
+    merged_spans=[(html.escape("".join(chars)),matched_len) for chars,matched_len in spandata]
     return merged_spans, min(matched_indices),max(matched_indices) #min is actually always 0, but it's here for future need
     
     
@@ -109,7 +110,8 @@ init()
 
 @app.route('/')
 def hello_world():
-    return render_template("index.html")
+    global all_batches
+    return render_template("index.html",users=sorted(all_batches.keys()))
 
 @app.route("/ann/<user>")
 def batchlist(user):
@@ -119,8 +121,15 @@ def batchlist(user):
 @app.route("/ann/<user>/<batchfile>")
 def jobsinbatch(user,batchfile):
     global all_batches
+    global textdbs
     pairs=all_batches[user][batchfile].data
-    pairdata=list((idx,pair.get("updated","not updated")) for idx,pair in enumerate(pairs))
+    pairdata=[]
+    for idx,pair in enumerate(pairs):
+        src1,f1=pair["d1"]
+        src2,f2=pair["d2"]
+        text1=textdbs[src1][f1]
+        text2=textdbs[src2][f2]
+        pairdata.append((idx,pair.get("updated","not updated"),text1[:100],text2[:100]))
     return render_template("doc_list_in_batch.html",user=user,batchfile=batchfile,pairdata=pairdata)
 
 @app.route("/saveann/<user>/<batchfile>/<pairseq>",methods=["POST"])
@@ -165,5 +174,5 @@ def fetch_document(user,batchfile,pairseq):
     
     annotation=pair.get("annotation",[])
     
-    return render_template("doc.html",left_text=text1,right_text=text2,left_spandata=spandata1,right_spandata=spandata2,pairseq=pairseq,batchfile=batchfile,user=user,annotation=annotation,min_mlen=min(min1,min2),max_mlen=max(max1,max2)+1,mlenv=min(max(max1,max2),30))
+    return render_template("doc.html",left_text=text1,right_text=text2,left_spandata=spandata1,right_spandata=spandata2,pairseq=pairseq,batchfile=batchfile,user=user,annotation=annotation,min_mlen=min(min1,min2),max_mlen=max(max1,max2)+1,mlenv=min(max(max1,max2),30),is_last=(pairseq==len(all_batches[user][batchfile].data)-1))
 

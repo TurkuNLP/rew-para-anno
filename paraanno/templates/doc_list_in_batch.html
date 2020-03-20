@@ -13,6 +13,7 @@
   <body>
 
     <ol class="breadcrumb">
+      	<li class="breadcrumb-item"><a href="/">home</a></li>
       <li class="breadcrumb-item"><a href="/ann/{{user}}">{{user}}</a></li>
       <li class="breadcrumb-item active"><a href="/ann/{{user}}/{{batchfile}}">{{batchfile}}</a></li>
     </ol>
@@ -20,8 +21,8 @@
 
     <div class="container">
       <ul class="list-group">
-	{% for idx,timestamp in pairdata %}
-	<li class="list-group-item"><a href="/ann/{{user}}/{{batchfile}}/{{idx}}">{{idx}} | {{timestamp.split(".")[0].replace("T"," ")}}</a></li>
+	{% for idx,timestamp,text1,text2 in pairdata %}
+	<li class="list-group-item"><a href="/ann/{{user}}/{{batchfile}}/{{idx}}">{{idx}} | {{timestamp.split(".")[0].replace("T"," ")}}</a> | {{text1}}...</li>
 	{% endfor %}
     </ul>
     </div>
