@@ -15,3 +15,6 @@ else
     flask run
 fi
 
+export PARAANN_DATA=$HOME/Turku-paraphrase-corpus/para-subtitles
+flask run
+
