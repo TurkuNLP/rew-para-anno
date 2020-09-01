@@ -29,50 +29,46 @@
 
       
       <div class="row">
-	<div class="col-4 p-1">
+	<div class="col-4$ p-1">
 	  {% if pairseq > 0 %}<a type="button" class="btn btn-sm btn-dark" id="prevdoc" href="/ann/{{user}}/{{batchfile}}/{{pairseq-1}}"><span class="fa fa-chevron-left"/></a>&nbsp;{% endif %}
 	  {% if not is_last %}<a type="button" class="btn btn-sm btn-dark" id="nextdoc" href="/ann/{{user}}/{{batchfile}}/{{pairseq+1}}"><span class="fa fa-chevron-right"/></a>&nbsp;{% endif %}
 	  <button type="button" class="btn btn-sm btn-dark" id="save">Save</button>
 	</div>
-	<div class="col-6 p-1">
-	  Hide: short&nbsp;<input type="range" class="custom-range" val="{{mlenv}}" id="matchlencutoff" min="{{min_mlen}}" max="{{max_mlen}}" step="1">&nbsp;long
-	</div>
       </div>
+
       
       <div class="row">
-	<div class="col-6 p-1 border" style="height:50vh;max-height:50vh;overflow-y:scroll;" id="text-left">
-	  {% for txt, spanclass in left_spandata %}<span class="matchspan" mlen="{{spanclass}}">{{txt | replace('\n', '<br/><br/>')|safe}}</span>{% endfor %}
+	<div class="col-12 p-1 border" style="" id="text-left">
+	  <span>{{text1}}</span>
 	</div>
 	
-	<div class="col-6 p-1 border" style="height:50vh;max-height:50vh;overflow-y:scroll;" id="text-right">
-	  {% for txt, spanclass in right_spandata %}<span class="matchspan" mlen="{{spanclass}}">{{txt| replace('\n', '<br/><br/>')|safe}}</span>{% endfor %}
+	<div class="col-12 p-1 border" style="" id="text-right">
+	  <span>{{text2}}</span>
 	</div>
 
       </div> <!-- row-->
 
-      <div class="row border">
-	<div class="col-1 p-1">
-	  <a href="#" id="plusann"><span class="fa fa-plus-circle" /></a>
+
+      {% for label,labeldesc in labels %}
+      <div class="row">
+	<div class="col-12 p-1">
+	  <input class="input autosave" type="radio" name="labelradio" id="labelradio" value="{{label}}" {% if label==annotation["label"] %}checked{% endif %}> {{labeldesc}} </input>
 	</div>
       </div>
+      {% endfor %}
+      
+      <div class="row">
+	<div class="col-12 p-1 border" style="">
+	  <textarea class="editdirty" style="width:100%;"  id="text-rew-left">{% if "rew1" in annotation %}{{annotation["rew1"]}}{% else %}{{text1}}{% endif %}</textarea>
+	</div>
+	
+	<div class="col-12 p-1 border" style="">
+	  <textarea class="editdirty" style="width:100%;"  id="text-rew-right">{% if "rew2" in annotation %}{{annotation["rew2"]}}{% else %}{{text2}}{% endif %}</textarea>
+	</div>
 
-      <div class="row border" style="max-height:40vh;overflow-y:scroll">
-	<div class="col-12 container" id="annotations">
+      </div> <!-- row-->
 
-	  {% for ann in annotation %}
-	  <div class="row border oneann">
-	    <div class="col-2">
-	      <a href="#" class="killann"> <span class="fa fa-trash-o" /> </a> &nbsp;
-	      <a href="#" class="dupeann"> <span class="fa fa-files-o" /> </a> &nbsp;
-	      <input type="text" maxlength="10" size="5em" class="clstext editdirty" value="{{ann.get('cls','')}}"></input>
-	    </div>
-           
-	    <div class="col-10 p-1">
-	      <textarea class="anntext" style="width:100%;">{{ ann.txt }}</textarea>
-	    </div>
-	  </div>`
-	  {% endfor %}
-
+      
 	  <!-- here go the annotations! -->
 	  
 	</div> <!-- container -->
@@ -103,11 +99,11 @@
 	  
 	  
       function get_all_data() {
-	  var anns=[];
-	  $.each($(".oneann"), function (i,e) {
-	      anns.push({"cls":$(".clstext",$(this)).val(), "txt":$(".anntext",$(this)).val()});
-	  }
-		);
+	  var anns={};
+	  anns["label"]=$("input:radio[name=labelradio]:checked").val();
+	  anns["rew1"]=$("#text-rew-left").val();
+	  anns["rew2"]=$("#text-rew-right").val();
+	  console.log(anns);
 	  return anns;
       }
 
@@ -126,58 +122,15 @@
 	  clean();
       }
 
-      function hide_match_cutoff(n) {
-	  $.each($(".matchspan"), function(i,e) {
-	      if (parseInt($(this).attr("mlen"))<n) {
-		  $(this).removeClass("matched");
-	      }
-	      else {
-		  $(this).addClass("matched");
-	      }
-	  });
-      }
-      
-      function new_empty_ann() {
-	  elem=`
-          <div class="row border oneann">
-	    <div class="col-2">
-	      <a href="#" class="killann"> <span class="fa fa-trash-o" /> </a> &nbsp; &nbsp; 
-	      <a href="#" class="dupeann"> <span class="fa fa-files-o" /> </a> &nbsp;
-              <input type="text" maxlength="10" style="max-width:5em" class="clstext editdirty"></input>
-	    </div>
-           
-	    <div class="col-10 p-1">
-	      <textarea class="anntext" style="width:100%;"></textarea>
-	    </div>
-	  </div>`
-
-	  $(elem).prependTo($("#annotations"));
-      }
-
-      function dupe_ann() {
-	  $(this).parent().parent().clone().insertBefore($(this).parent().parent());
-	  dirty();
-      }
-      
-      function kill_ann() {
-	  $(this).parent().parent().remove();
-	  dirty();
-      }
 
       $(document).ready(
 	  function() {
-	      $("#plusann").on("click", new_empty_ann);
-	      $("#matchlencutoff").on("input",function(){
-		  hide_match_cutoff($(this).val());
-              });
-	      $("#matchlencutoff").trigger("input");
 	      $("#save").on("click",save_data);
 	  }
       );
 
-      $(document).on("click",".killann", kill_ann);
-      $(document).on("click",".dupeann", dupe_ann);
       $(document).on("input",".editdirty",dirty);
+      $(document).on("input",".autosave",save_data);
 
       </script>
 
