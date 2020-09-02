@@ -26,49 +26,63 @@
 	  <li class="breadcrumb-item"><a href="/ann/{{user}}/{{batchfile}}">{{batchfile}}</a></li>
 	  <li class="breadcrumb-item active"><a href="/ann/{{user}}/{{batchfile}}/{{pairseq}}">{{pairseq}}</a></li>
 	</ol>
-
       
       <div class="row">
-	<div class="col-4$ p-1">
-	  {% if pairseq > 0 %}<a type="button" class="btn btn-sm btn-dark" id="prevdoc" href="/ann/{{user}}/{{batchfile}}/{{pairseq-1}}"><span class="fa fa-chevron-left"/></a>&nbsp;{% endif %}
-	  {% if not is_last %}<a type="button" class="btn btn-sm btn-dark" id="nextdoc" href="/ann/{{user}}/{{batchfile}}/{{pairseq+1}}"><span class="fa fa-chevron-right"/></a>&nbsp;{% endif %}
-	  <button type="button" class="btn btn-sm btn-dark" id="save">Save</button>
-	</div>
-      </div>
-
-      
-      <div class="row">
-	<div class="col-12 p-1 border" style="" id="text-left">
-	  <span>{{text1}}</span>
+	<div class="col-12 p-1 m-2 border border-primary rounded">
+	  <span id="text-left">{{text1}}</span>
 	</div>
 	
-	<div class="col-12 p-1 border" style="" id="text-right">
-	  <span>{{text2}}</span>
+	<div class="col-12 p-1 m-2 mt-4 border border-primary rounded">
+	  <span id="text-right">{{text2}}</span>
 	</div>
-
       </div> <!-- row-->
 
 
       {% for label,labeldesc in labels %}
       <div class="row">
-	<div class="col-12 p-1">
+	<div class="col-12 p-1 ml-2 mt-3">
 	  <input class="input autosave" type="radio" name="labelradio" id="labelradio" value="{{label}}" {% if label==annotation["label"] %}checked{% endif %}> {{labeldesc}} </input>
 	</div>
       </div>
       {% endfor %}
+
+      <div class="row mt-3 mb-1">
+	<div class="col-2">
+	  <button type="button" id="copyandrewbtn" class="btn btn-lg btn-info">Copy to rewrite</button>
+	</div>
+
+	<div class="col-2">
+	  <button type="button" id="wipebtn" class="btn btn-lg btn-info">Wipe</button>
+	</div>
+
+      </div>
+
       
       <div class="row">
-	<div class="col-12 p-1 border" style="">
-	  <textarea class="editdirty" style="width:100%;"  id="text-rew-left">{% if "rew1" in annotation %}{{annotation["rew1"]}}{% else %}{{text1}}{% endif %}</textarea>
+	<div class="col-12 p-1 m-2" style="">
+	  <textarea class="editdirty" style="width:100%;"  id="text-rew-left">{% if "rew1" in annotation %}{{annotation["rew1"]}}{% endif %}</textarea>
 	</div>
 	
-	<div class="col-12 p-1 border" style="">
-	  <textarea class="editdirty" style="width:100%;"  id="text-rew-right">{% if "rew2" in annotation %}{{annotation["rew2"]}}{% else %}{{text2}}{% endif %}</textarea>
+	<div class="col-12 p-1 m-2" style="">
+	  <textarea class="editdirty" style="width:100%;"  id="text-rew-right">{% if "rew2" in annotation %}{{annotation["rew2"]}}{% endif %}</textarea>
 	</div>
 
       </div> <!-- row-->
 
+
       
+     <div class="row">
+	<div class="col-1 p-1">
+	  {% if pairseq > 0 %}<a type="button" class="btn btn-lg btn-info" id="prevdoc" href="/ann/{{user}}/{{batchfile}}/{{pairseq-1}}"><span class="fa fa-chevron-left"/></a>&nbsp;{% endif %}
+	</div>
+	<div class="col-1 p-1">
+	  {% if not is_last %}<a type="button" class="btn btn-lg btn-info" id="nextdoc" href="/ann/{{user}}/{{batchfile}}/{{pairseq+1}}"><span class="fa fa-chevron-right"/></a>&nbsp;{% endif %}
+	</div>
+	<div class="col-1$ p-1">
+	  <button type="button" class="btn btn-lg btn-info" id="save">Save</button>
+	</div>
+      </div>
+
 	  <!-- here go the annotations! -->
 	  
 	</div> <!-- container -->
@@ -92,12 +106,26 @@
 	  
       }
 
+      function wipe_rew() {
+	  $("#text-rew-left").val("");
+	  $("#text-rew-right").val("");
+	  dirty();
+      }
+
       function clean() {
 	  $("#prevdoc").removeClass("disabled");
 	  $("#nextdoc").removeClass("disabled");
       }
 	  
-	  
+      function copy_to_rewrite() {
+	  var t1=$("#text-left").text();
+	  var t2=$("#text-right").text();
+	  $("#text-rew-left").val(t1);
+	  $("#text-rew-right").val(t2)
+	  dirty();
+      }
+
+      
       function get_all_data() {
 	  var anns={};
 	  anns["label"]=$("input:radio[name=labelradio]:checked").val();
@@ -126,6 +154,8 @@
       $(document).ready(
 	  function() {
 	      $("#save").on("click",save_data);
+	      $("#copyandrewbtn").on("click",copy_to_rewrite);
+	      $("#wipebtn").on("click",wipe_rew);
 	  }
       );
 
