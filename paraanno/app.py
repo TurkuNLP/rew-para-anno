@@ -1,3 +1,5 @@
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+import flask
 from flask import Flask
 from flask import render_template, request
 import os
@@ -8,8 +10,11 @@ import datetime
 import difflib
 import html
 
+
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config["APPLICATION_ROOT"] = "/rew-para"
+APP_ROOT="/rew-para"
 
 DATADIR=os.environ["PARAANN_DATA"]
 
@@ -44,12 +49,12 @@ init()
 @app.route('/')
 def hello_world():
     global all_batches
-    return render_template("index.html",users=sorted(all_batches.keys()))
+    return render_template("index.html",app_root=APP_ROOT,users=sorted(all_batches.keys()))
 
 @app.route("/ann/<user>")
 def batchlist(user):
     global all_batches
-    return render_template("batch_list.html",batches=sorted(all_batches[user].keys()),user=user)
+    return render_template("batch_list.html",app_root=APP_ROOT,batches=sorted(all_batches[user].keys()),user=user)
 
 @app.route("/ann/<user>/<batchfile>")
 def jobsinbatch(user,batchfile):
@@ -60,7 +65,7 @@ def jobsinbatch(user,batchfile):
         text1=pair["txt1"]
         text2=pair["txt2"]
         pairdata.append((idx,pair.get("updated","not updated"),text1[:50],text2[:50]))
-    return render_template("doc_list_in_batch.html",user=user,batchfile=batchfile,pairdata=pairdata)
+    return render_template("doc_list_in_batch.html",app_root=APP_ROOT,user=user,batchfile=batchfile,pairdata=pairdata)
 
 @app.route("/saveann/<user>/<batchfile>/<pairseq>",methods=["POST"])
 def save_document(user,batchfile,pairseq):
@@ -97,5 +102,5 @@ def fetch_document(user,batchfile,pairseq):
     annotation=pair.get("annotation",{})
 
     labels=[("4","Paraphrase"), ("3","Near paraphrase"), ("2","Related but not paraphrase"), ("1","Unrelated")]
-    return render_template("doc.html",text1=text1,text2=text2,pairseq=pairseq,batchfile=batchfile,user=user,annotation=annotation,labels=labels,is_last=(pairseq==len(all_batches[user][batchfile].data)-1))
+    return render_template("doc.html",app_root=APP_ROOT,text1=text1,text2=text2,pairseq=pairseq,batchfile=batchfile,user=user,annotation=annotation,labels=labels,is_last=(pairseq==len(all_batches[user][batchfile].data)-1))
 

@@ -21,10 +21,10 @@
     <div class="container">
 
       <ol class="breadcrumb">
-	<li class="breadcrumb-item"><a href="/">home</a></li>
-	  <li class="breadcrumb-item"><a href="/ann/{{user}}">{{user}}</a></li>
-	  <li class="breadcrumb-item"><a href="/ann/{{user}}/{{batchfile}}">{{batchfile}}</a></li>
-	  <li class="breadcrumb-item active"><a href="/ann/{{user}}/{{batchfile}}/{{pairseq}}">{{pairseq}}</a></li>
+	<li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
+	  <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}">{{user}}</a></li>
+	  <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}/{{batchfile}}">{{batchfile}}</a></li>
+	  <li class="breadcrumb-item active"><a href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq}}">{{pairseq}}</a></li>
 	</ol>
       
       <div class="row">
@@ -73,10 +73,10 @@
       
      <div class="row">
 	<div class="col-1 p-1">
-	  {% if pairseq > 0 %}<a type="button" class="btn btn-lg btn-info" id="prevdoc" href="/ann/{{user}}/{{batchfile}}/{{pairseq-1}}"><span class="fa fa-chevron-left"/></a>&nbsp;{% endif %}
+	  {% if pairseq > 0 %}<a type="button" class="btn btn-lg btn-info" id="prevdoc" href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq-1}}"><span class="fa fa-chevron-left"/></a>&nbsp;{% endif %}
 	</div>
 	<div class="col-1 p-1">
-	  {% if not is_last %}<a type="button" class="btn btn-lg btn-info" id="nextdoc" href="/ann/{{user}}/{{batchfile}}/{{pairseq+1}}"><span class="fa fa-chevron-right"/></a>&nbsp;{% endif %}
+	  {% if not is_last %}<a type="button" class="btn btn-lg btn-info" id="nextdoc" href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq+1}}"><span class="fa fa-chevron-right"/></a>&nbsp;{% endif %}
 	</div>
 	<div class="col-1$ p-1">
 	  <button type="button" class="btn btn-lg btn-info" id="save">Save</button>
@@ -139,7 +139,7 @@
 	  var all_data=get_all_data();
 	  var docpairpath = localStorage.getItem('docpairpath');
 	  $.ajax({type: 'POST',
-		  url: "/saveann/"+docpairpath,
+		  url: "{{app_root}}/saveann/"+docpairpath,
 		  data: JSON.stringify(all_data),
 		  contentType: 'application/json',
 		  error: function () { $("#save").css("background-color","red"); },
