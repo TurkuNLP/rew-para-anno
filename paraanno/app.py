@@ -13,7 +13,7 @@ import html
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-APP_ROOT = os.environ['APP_ROOT']
+APP_ROOT = os.environ.get('APP_ROOT', '')
 app.config["APPLICATION_ROOT"] = APP_ROOT
 
 DATADIR=os.environ["PARAANN_DATA"]
@@ -101,6 +101,6 @@ def fetch_document(user,batchfile,pairseq):
 
     annotation=pair.get("annotation",{})
 
-    labels=[("4","Paraphrase"), ("3","Near paraphrase"), ("2","Related but not paraphrase"), ("1","Unrelated")]
+    labels=[("4","4: Paraphrase"), ("3","3: Partial paraphrase"), ("2","2: Related but not paraphrase"), ("1","1: Unrelated"), ("x","x: Skip")]
     return render_template("doc.html",app_root=APP_ROOT,text1=text1,text2=text2,pairseq=pairseq,batchfile=batchfile,user=user,annotation=annotation,labels=labels,is_last=(pairseq==len(all_batches[user][batchfile].data)-1))
 
