@@ -39,7 +39,23 @@ class Batch:
         s=json.dumps(self.data,ensure_ascii=False,indent=2,sort_keys=True)
         with open(self.batchfile,"wt") as f:
             print(s,file=f)
-        
+
+    @property
+    def get_batch_len(self):
+        batch_num = len(self.data)
+        return batch_num
+
+    @property
+    def get_anno_stats(self):    
+        annotations = [1 if "annotation" in pair else 0 for pair in self.data]
+        return sum(annotations)
+
+    @property
+    def get_update_timestamp(self):
+        timestamps = [datetime.datetime.fromisoformat(pair["annotation"]["updated"]) for pair in self.data if "annotation" in pair]
+        return max(timestamps).isoformat()
+
+    
 def init():
     global all_batches
     all_batches=read_batches()
@@ -54,7 +70,9 @@ def hello_world():
 @app.route("/ann/<user>")
 def batchlist(user):
     global all_batches
-    return render_template("batch_list.html",app_root=APP_ROOT,batches=sorted(all_batches[user].keys()),user=user)
+    batch_anno_stats = [(fname, batch.get_batch_len, batch.get_anno_stats, round(100*batch.get_anno_stats/batch.get_batch_len), batch.get_update_timestamp) for fname, batch in all_batches[user].items()]
+    batch_anno_stats = sorted(batch_anno_stats, key=lambda x:x[0])
+    return render_template("batch_list.html",app_root=APP_ROOT,batches=batch_anno_stats,user=user)
 
 @app.route("/ann/<user>/<batchfile>")
 def jobsinbatch(user,batchfile):

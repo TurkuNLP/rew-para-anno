@@ -12,17 +12,24 @@
   </head>
   <body>
 
-    <ol class="breadcrumb">
-      	<li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
-      <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}">{{user}}</a></li>
-    </ol>
-
     <div class="container">
-    <ul class="list-group">
-      {% for bname in batches %}
-      <li class="list-group-item"><a href="{{app_root}}/ann/{{user}}/{{bname}}">{{bname}}</a></li>
-      {% endfor %}
-    </ul>
+      <ol class="breadcrumb">
+      	<li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
+        <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}">{{user}}</a></li>
+      </ol>
+
+      <ul class="list-group">
+        {% for bname,len,done,percentage,timestamp in batches %}
+	
+        <li class="list-group-item">
+	  <a href="{{app_root}}/ann/{{user}}/{{bname}}"> {{timestamp.split(".")[0].replace("T"," ")}} | {{bname}}</a>
+	  <a class="progress-bar progress-bar-info progress-bar-striped" role="progressbar"
+	     aria-valuenow="{{percentage}}" aria-valuemin="0" aria-valuemax="100" style="width:{{percentage}}%">
+	    {{done}} / {{len}}
+	  </a>
+	</li>
+        {% endfor %}
+      </ul>
     </div>
     
     <!-- Optional JavaScript -->
