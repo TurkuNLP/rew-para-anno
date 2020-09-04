@@ -98,6 +98,7 @@
     <script>
 
       localStorage.setItem('docpairpath', '{{user}}/{{batchfile}}/{{pairseq}}');
+      localStorage.setItem('username','{{user}}');
 
       function dirty() {
 	  $("#prevdoc").addClass("disabled");
@@ -131,7 +132,7 @@
 	  anns["label"]=$("input:radio[name=labelradio]:checked").val();
 	  anns["rew1"]=$("#text-rew-left").val();
 	  anns["rew2"]=$("#text-rew-right").val();
-	  console.log(anns);
+	  anns["user"]=localStorage.getItem('username');
 	  return anns;
       }
 

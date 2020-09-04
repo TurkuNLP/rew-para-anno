@@ -64,7 +64,11 @@ def jobsinbatch(user,batchfile):
     for idx,pair in enumerate(pairs):
         text1=pair["txt1"]
         text2=pair["txt2"]
-        pairdata.append((idx,pair.get("updated","not updated"),text1[:50],text2[:50]))
+        ann=pair.get("annotation",{})
+        lab=""
+        if ann:
+            lab=ann.get("label","?")
+        pairdata.append((idx,ann.get("updated","not updated"),lab,text1[:50],text2[:50]))
     return render_template("doc_list_in_batch.html",app_root=APP_ROOT,user=user,batchfile=batchfile,pairdata=pairdata)
 
 @app.route("/saveann/<user>/<batchfile>/<pairseq>",methods=["POST"])
@@ -73,7 +77,7 @@ def save_document(user,batchfile,pairseq):
     pairseq=int(pairseq)
     annotation=request.json
     pair=all_batches[user][batchfile].data[pairseq]
-    pair["updated"]=datetime.datetime.now().isoformat()
+    annotation["updated"]=datetime.datetime.now().isoformat()
     pair["annotation"]=annotation
     all_batches[user][batchfile].save()
     return "",200
@@ -100,7 +104,7 @@ def fetch_document(user,batchfile,pairseq):
     text2=pair["txt2"]
 
     annotation=pair.get("annotation",{})
-
+    
     labels=[("4","4: Paraphrase"), ("3","3: Partial paraphrase"), ("2","2: Related but not paraphrase"), ("1","1: Unrelated"), ("x","x: Skip")]
     return render_template("doc.html",app_root=APP_ROOT,text1=text1,text2=text2,pairseq=pairseq,batchfile=batchfile,user=user,annotation=annotation,labels=labels,is_last=(pairseq==len(all_batches[user][batchfile].data)-1))
 
