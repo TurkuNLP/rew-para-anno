@@ -18,6 +18,19 @@
         <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}">{{user}}</a></li>
       </ol>
 
+    <h3>Overall statistics: {{stats[0]}} completed, {{stats[1]}} skipped, {{stats[2]}} left, total: {{stats[3]}}</h3>
+    <div class="progress">
+      <div class="progress-bar progress-bar-striped bg-success" style="width:{{100*stats[0]/stats[3]}}%">
+	{{stats[0]}}
+      </div>
+      <div class="progress-bar progress-bar-striped bg-warning" style="width:{{100*stats[1]/stats[3]}}%">
+	{{stats[1]}}
+      </div>
+      <div class="progress-bar progress-bar-striped bg-danger" style="width:{{100*stats[2]/stats[3]}}%">
+	{{stats[2]}}
+      </div>
+    </div>
+    <br>
       <ul class="list-group">
         {% for bname,len,(done,skipped,left),timestamp in batches %}
 	

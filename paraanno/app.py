@@ -85,7 +85,20 @@ def batchlist(user):
     global all_batches
     batch_anno_stats = [(fname, batch.get_batch_len, batch.get_anno_stats, batch.get_update_timestamp) for fname, batch in all_batches[user].items()]
     batch_anno_stats = sorted(batch_anno_stats, key=lambda x:x[0])
-    return render_template("batch_list.html",app_root=APP_ROOT,batches=batch_anno_stats,user=user)
+
+    # calculate total number of annotations
+    total = 0
+    t_done = 0
+    t_skipped = 0
+    t_left = 0
+    for fname, batchlen, (done,skipped,left), _ in batch_anno_stats:
+        total += batchlen
+        t_done += done
+        t_skipped += skipped
+        t_left += left
+    assert t_left + t_skipped + t_done == total
+    
+    return render_template("batch_list.html",app_root=APP_ROOT,batches=batch_anno_stats,user=user,stats=(t_done,t_skipped,t_left,total))
 
 @app.route("/ann/<user>/<batchfile>")
 def jobsinbatch(user,batchfile):
