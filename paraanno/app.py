@@ -13,8 +13,8 @@ import html
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.config["APPLICATION_ROOT"] = "/rew-para"
-APP_ROOT="/rew-para"
+APP_ROOT = os.environ['APP_ROOT']
+app.config["APPLICATION_ROOT"] = APP_ROOT
 
 DATADIR=os.environ["PARAANN_DATA"]
 
