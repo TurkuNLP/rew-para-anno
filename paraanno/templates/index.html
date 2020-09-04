@@ -11,12 +11,21 @@
     <title>para-ann</title>
   </head>
   <body>
+
+    <ol class="breadcrumb">
+      	<li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
+    </ol>
+
+    
     <div class="container">
-      <ul>
-	{% for user in users %}
-	<li><a href="{{app_root}}/ann/{{user}}">{{user}}</a></li>
+
+      {% for user in users %}
+      <div class="row">
+	<div class="col-12">
+	  <a href="{{app_root}}/ann/{{user}}">{{user}}</a>
+	</div>
+      </div>
 	{% endfor %}
-      </ul>
     </div>
       
     <!-- Optional JavaScript -->
