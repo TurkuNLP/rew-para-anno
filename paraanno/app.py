@@ -53,7 +53,10 @@ class Batch:
     @property
     def get_update_timestamp(self):
         timestamps = [datetime.datetime.fromisoformat(pair["annotation"]["updated"]) for pair in self.data if "annotation" in pair]
-        return max(timestamps).isoformat()
+        if not timestamps:
+            return "no updates"
+        else:
+            return max(timestamps).isoformat()
 
     
 def init():
