@@ -13,7 +13,7 @@ import html
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-APP_ROOT = os.environ.get('APP_ROOT', '')
+APP_ROOT = os.environ.get('PARAANN_APP_ROOT',"")
 app.config["APPLICATION_ROOT"] = APP_ROOT
 
 DATADIR=os.environ["PARAANN_DATA"]
