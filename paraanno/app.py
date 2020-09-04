@@ -46,9 +46,19 @@ class Batch:
         return batch_num
 
     @property
-    def get_anno_stats(self):    
-        annotations = [1 if "annotation" in pair else 0 for pair in self.data]
-        return sum(annotations)
+    def get_anno_stats(self):
+        completed = 0
+        skipped = 0
+        left = 0
+        for pair in self.data:
+            if "annotation" in pair:
+                if pair["annotation"]["label"]!="x":
+                    completed += 1
+                else:
+                    skipped += 1
+            else:
+                left += 1
+        return (completed, skipped, left)
 
     @property
     def get_update_timestamp(self):
@@ -73,7 +83,7 @@ def hello_world():
 @app.route("/ann/<user>")
 def batchlist(user):
     global all_batches
-    batch_anno_stats = [(fname, batch.get_batch_len, batch.get_anno_stats, round(100*batch.get_anno_stats/batch.get_batch_len), batch.get_update_timestamp) for fname, batch in all_batches[user].items()]
+    batch_anno_stats = [(fname, batch.get_batch_len, batch.get_anno_stats, batch.get_update_timestamp) for fname, batch in all_batches[user].items()]
     batch_anno_stats = sorted(batch_anno_stats, key=lambda x:x[0])
     return render_template("batch_list.html",app_root=APP_ROOT,batches=batch_anno_stats,user=user)
 

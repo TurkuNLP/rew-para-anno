@@ -19,14 +19,21 @@
       </ol>
 
       <ul class="list-group">
-        {% for bname,len,done,percentage,timestamp in batches %}
+        {% for bname,len,(done,skipped,left),timestamp in batches %}
 	
         <li class="list-group-item">
-	  <a href="{{app_root}}/ann/{{user}}/{{bname}}"> {{timestamp.split(".")[0].replace("T"," ")}} | {{bname}}</a>
-	  <a class="progress-bar progress-bar-info progress-bar-striped" role="progressbar"
-	     aria-valuenow="{{percentage}}" aria-valuemin="0" aria-valuemax="100" style="width:{{percentage}}%">
-	    {{done}} / {{len}}
-	  </a>
+	  <a href="{{app_root}}/ann/{{user}}/{{bname}}"> {{timestamp.split(".")[0].replace("T"," ")}} | {{done}} done {{skipped}} skipped {{left}} left / {{len}} | {{bname}}</a>
+	  <div class="progress">
+            <div class="progress-bar bg-success" role="progressbar"
+	       aria-valuenow="{{percentage}}" aria-valuemin="0" aria-valuemax="100" style="width:{{100*done/len}}%">
+	    </div>
+            <div class="progress-bar bg-warning" role="progressbar"
+	       aria-valuenow="{{100*skipped/len}}" aria-valuemin="0" aria-valuemax="100" style="width:{{100*skipped/len}}%">
+	    </div>
+            <div class="progress-bar bg-danger" role="progressbar"
+	       aria-valuenow="{{100*left/len}}" aria-valuemin="0" aria-valuemax="100" style="width:{{100*left/len}}%">
+	    </div>
+	  </div>
 	</li>
         {% endfor %}
       </ul>
