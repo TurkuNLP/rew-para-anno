@@ -52,10 +52,13 @@ class Batch:
         left = 0
         for pair in self.data:
             if "annotation" in pair:
-                if pair["annotation"]["label"]!="x":
-                    completed += 1
+                if "label" in pair["annotation"]:
+                    if pair["annotation"]["label"]!="x":
+                        completed += 1
+                    else:
+                        skipped += 1
                 else:
-                    skipped += 1
+                    left += 1
             else:
                 left += 1
         return (completed, skipped, left)
