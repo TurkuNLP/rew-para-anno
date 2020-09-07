@@ -2,6 +2,8 @@ import json
 import argparse
 import glob
 import os
+import sys
+import hashlib
 # TSV fields: ID, annotator, timestamp, label, text
 
 def read_dirs(args):
@@ -16,11 +18,14 @@ def yield_from_json(fname):
         annotation = example.get("annotation", None)
         if not annotation:
             continue
-        label = annotation.get("label", None)
+        label = annotation.get("label")
         if not label:
             continue
         text = " --- ".join([example.get("txt1", "EMPTY"), example.get("txt2", "EMPTY")])
-        yield [example.get("id"), annotation.get("user"), annotation.get("updated"), label, text]
+        idx = example.get("id")
+        if idx is None: # if ID missing, calculate idx using text fields
+            idx = hashlib.sha224(text.encode()).hexdigest()
+        yield [idx, annotation.get("user", "EMPTY"), annotation.get("updated", "EMPTY"), label, text]
 
 
 def main(args):
