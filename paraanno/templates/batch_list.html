@@ -12,17 +12,54 @@
   </head>
   <body>
 
-    <ol class="breadcrumb">
-      	<li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
-      <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}">{{user}}</a></li>
-    </ol>
-
     <div class="container">
-    <ul class="list-group">
-      {% for bname in batches %}
-      <li class="list-group-item"><a href="{{app_root}}/ann/{{user}}/{{bname}}">{{bname}}</a></li>
-      {% endfor %}
-    </ul>
+      <ol class="breadcrumb">
+      	<li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
+        <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}">{{user}}</a></li>
+      </ol>
+
+    <h3>Overall statistics: {{stats[0]}} completed, {{stats[1]}} skipped, {{stats[2]}} left, total: {{stats[3]}}</h3>
+    <div class="progress">
+      <div class="progress-bar progress-bar-striped bg-success" style="width:{{100*stats[0]/stats[3]}}%">
+	{{stats[0]}}
+      </div>
+      <div class="progress-bar progress-bar-striped bg-warning" style="width:{{100*stats[1]/stats[3]}}%">
+	{{stats[1]}}
+      </div>
+      <div class="progress-bar progress-bar-striped bg-danger" style="width:{{100*stats[2]/stats[3]}}%">
+	{{stats[2]}}
+      </div>
+    </div>
+    <br>
+        <div class="container">
+        {% for bname,len,(done,skipped,left),timestamp in batches %}
+	<div class="row">
+	  <div class="col-4">
+	    <a href="{{app_root}}/ann/{{user}}/{{bname}}">  {{bname}} </a>
+	  </div>
+	  <div class="col-2">
+	    {{timestamp.split(".")[0].replace("T"," ")}}
+	  </div>
+
+	  <div class="col-3">
+	    {{done}} done {{skipped}} skipped / {{len}}<!-- {{left}} left  -->
+	  </div>
+	  <div class="col-3">
+	    <div class="progress">
+              <div class="progress-bar bg-success" role="progressbar"
+		   aria-valuenow="{{percentage}}" aria-valuemin="0" aria-valuemax="100" style="width:{{100*done/len}}%">
+	      </div>
+              <div class="progress-bar bg-warning" role="progressbar"
+		   aria-valuenow="{{100*skipped/len}}" aria-valuemin="0" aria-valuemax="100" style="width:{{100*skipped/len}}%">
+	      </div>
+              <div class="progress-bar bg-danger" role="progressbar"
+		   aria-valuenow="{{100*left/len}}" aria-valuemin="0" aria-valuemax="100" style="width:{{100*left/len}}%">
+	      </div>
+	    </div>
+	  </div>
+	</div> <!-- row -->
+        {% endfor %}
+	</div> <!-- container -->
     </div>
     
     <!-- Optional JavaScript -->

@@ -39,7 +39,39 @@ class Batch:
         s=json.dumps(self.data,ensure_ascii=False,indent=2,sort_keys=True)
         with open(self.batchfile,"wt") as f:
             print(s,file=f)
-        
+
+    @property
+    def get_batch_len(self):
+        batch_num = len(self.data)
+        return batch_num
+
+    @property
+    def get_anno_stats(self):
+        completed = 0
+        skipped = 0
+        left = 0
+        for pair in self.data:
+            if "annotation" in pair:
+                if "label" in pair["annotation"]:
+                    if pair["annotation"]["label"]!="x":
+                        completed += 1
+                    else:
+                        skipped += 1
+                else:
+                    left += 1
+            else:
+                left += 1
+        return (completed, skipped, left)
+
+    @property
+    def get_update_timestamp(self):
+        timestamps = [datetime.datetime.fromisoformat(pair["annotation"]["updated"]) for pair in self.data if "annotation" in pair]
+        if not timestamps:
+            return "no updates"
+        else:
+            return max(timestamps).isoformat()
+
+    
 def init():
     global all_batches
     all_batches=read_batches()
@@ -54,7 +86,22 @@ def hello_world():
 @app.route("/ann/<user>")
 def batchlist(user):
     global all_batches
-    return render_template("batch_list.html",app_root=APP_ROOT,batches=sorted(all_batches[user].keys()),user=user)
+    batch_anno_stats = [(fname, batch.get_batch_len, batch.get_anno_stats, batch.get_update_timestamp) for fname, batch in all_batches[user].items()]
+    batch_anno_stats = sorted(batch_anno_stats, key=lambda x:x[0])
+
+    # calculate total number of annotations
+    total = 0
+    t_done = 0
+    t_skipped = 0
+    t_left = 0
+    for fname, batchlen, (done,skipped,left), _ in batch_anno_stats:
+        total += batchlen
+        t_done += done
+        t_skipped += skipped
+        t_left += left
+    assert t_left + t_skipped + t_done == total
+    
+    return render_template("batch_list.html",app_root=APP_ROOT,batches=batch_anno_stats,user=user,stats=(t_done,t_skipped,t_left,total))
 
 @app.route("/ann/<user>/<batchfile>")
 def jobsinbatch(user,batchfile):

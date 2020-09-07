@@ -12,14 +12,13 @@
   </head>
   <body>
 
-    <ol class="breadcrumb">
-      	<li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
-      <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}">{{user}}</a></li>
-      <li class="breadcrumb-item active"><a href="{{app_root}}/ann/{{user}}/{{batchfile}}">{{batchfile}}</a></li>
-    </ol>
-
-
     <div class="container">
+      <ol class="breadcrumb">
+      	<li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
+        <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}">{{user}}</a></li>
+        <li class="breadcrumb-item active"><a href="{{app_root}}/ann/{{user}}/{{batchfile}}">{{batchfile}}</a></li>
+      </ol>
+
       {% for idx,timestamp,label,text1,text2 in pairdata %}
       <div class="row">
 	<div class="col-1">
