@@ -46,6 +46,7 @@
       <!-- </div> -->
       <!-- {% endfor %} -->
 
+     
       <div class="row mt-4 mb-4">
 	<div class="col-1">
 	  <b>Label</b>
@@ -53,6 +54,22 @@
 	<div class="col-2">
 	  <textarea class="autosave" style="width:100%;" id="label">{{annotation["label"]}}</textarea>
 	</div>
+	<div class="col-1">
+	</div>
+	<div class="col-8">
+	  <ul style="list-style-type:none;">
+	    <li>4: Paraphrase</li>
+	    <li>4<: Upper is more general</li>
+		    <li>4>: Lower is more general</li>
+	    <li>3: Partial paraphrase</li>
+	    <li>2: Related but not paraphrase</li>
+	    <li>1: Unrelated</li>
+	    <li>x: Skip</li>
+	    <li>T: tone</li>
+	    <li>R: register</li>
+	  </ul>
+	</div>
+	
       </div>
       
       <div class="row mt-3 mb-1">
