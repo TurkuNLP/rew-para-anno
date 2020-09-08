@@ -116,14 +116,13 @@
 	  
 	</div> <!-- container -->
       </div> <!-- row-->
-    </div>
-
+     </div>
+    
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
     <script>
 
       localStorage.setItem('docpairpath', '{{user}}/{{batchfile}}/{{pairseq}}');
@@ -180,6 +179,9 @@
 	  clean();
       }
 
+      function printmoi() {
+	  alert('Moi')
+      }
 
       $(document).ready(
 	  function() {
@@ -187,11 +189,41 @@
 	      $("#copyandrewbtn").on("click",copy_to_rewrite);
 	      $("#wipebtn").on("click",wipe_rew);
 	      $("#label").focus();
+	      
 	  }
       );
 
       $(document).on("input",".editdirty",dirty);
       $(document).on("input",".autosave",save_data);
+
+      var keys = {};
+
+      $(document).keydown(function(event) {
+	  keys[event.which] = true;
+	  //<div id="log"></div>
+	  //$( "#log" ).html( event.type + ": " +  event.which );
+	  //$( "#log" ).html( Object.keys(keys).length );
+	  if (keys[17] && keys[49]) { // Ctrl + Alt + z
+	      copy_to_rewrite();
+	      delete keys[17];
+	      delete keys[49];
+	  }
+	  else if (keys[17] && keys[50]) { // Ctrl + Alt + x
+	      wipe_rew();
+	      delete keys[17];
+	      delete keys[50];
+	  }
+	  else if (keys[17] && keys[51]) { // Ctrl + Alt + x
+	      save_data();
+	      delete keys[17];
+	      delete keys[51];
+	  }
+	      
+      });
+
+      $(document).keyup(function(event) {
+	  delete keys[event.which];
+      });
 
       </script>
 
