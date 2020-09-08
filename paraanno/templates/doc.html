@@ -38,17 +38,46 @@
       </div> <!-- row-->
 
 
-      {% for label,labeldesc in labels %}
-      <div class="row">
-	<div class="col-12 p-1 ml-2 mt-3">
-	  <input class="input autosave" type="radio" name="labelradio" id="labelradio" value="{{label}}" {% if label==annotation["label"] %}checked{% endif %}> {{labeldesc}} </input>
-	</div>
-      </div>
-      {% endfor %}
+      <!-- {% for label,labeldesc in labels %} -->
+      <!-- <div class="row"> -->
+      <!-- 	<div class="col-12 p-1 ml-2 mt-3"> -->
+      <!-- 	  <input class="input autosave" type="radio" name="labelradio" id="labelradio" value="{{label}}" {% if label==annotation["label"] %}checked{% endif %}> {{labeldesc}} </input> -->
+      <!-- 	</div> -->
+      <!-- </div> -->
+      <!-- {% endfor %} -->
 
+     
+      <div class="row mt-4 mb-4">
+	<div class="col-1">
+	  <b>Label</b>
+	</div>
+	<div class="col-2">
+	  <textarea tabindex="1" class="autosave" style="width:100%;" id="label">{{annotation["label"]}}</textarea>
+	</div>
+	<div class="col-1">
+	</div>
+
+	<div class="col-4">
+	  <ul style="list-style-type:none;">
+	    {% for l,d in (("4","Paraphrase"),("4<","Upper is more general"),("4>","Lower is more general"),("3","Paraphrase here but not in general"),("2","Related but not paraphrase"),("1","Unrelated"),("x","Skip")) %}
+	      <li> <span class="badge badge-success">{{l}}</span> : {{d}} </li>
+	    {% endfor %}
+	  </ul>
+	</div>
+
+	<div class="col-4">
+	  <ul style="list-style-type:none;">
+	    {% for l,d in (("s","Style (tone or register)"),("i","Diff in number, person, etc")) %}
+	      <li> <span class="badge badge-success">{{l}}</span> : {{d}} </li>
+	    {% endfor %}
+	  </ul>
+	</div>
+	
+      </div> <!-- Row -->
+      
       <div class="row mt-3 mb-1">
 	<div class="col-3">
-	  <button type="button" id="copyandrewbtn" class="btn btn-lg btn-info">Copy to rewrite</button>
+	  <button tabindex="6" type="button" id="copyandrewbtn" class="btn btn-lg btn-info">Copy to rewrite</button>
 	</div>
 
 	<div class="col-3">
@@ -76,7 +105,7 @@
 	  {% if pairseq > 0 %}<a type="button" class="btn btn-lg btn-info" id="prevdoc" href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq-1}}"><span class="fa fa-chevron-left"/></a>&nbsp;{% endif %}
 	</div>
 	<div class="col-1 p-1">
-	  {% if not is_last %}<a type="button" class="btn btn-lg btn-info" id="nextdoc" href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq+1}}"><span class="fa fa-chevron-right"/></a>&nbsp;{% endif %}
+	  {% if not is_last %}<a tabindex="4" type="button" class="btn btn-lg btn-info" id="nextdoc" href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq+1}}"><span class="fa fa-chevron-right"/></a>&nbsp;{% endif %}
 	</div>
 	<div class="col-1$ p-1">
 	  <button type="button" class="btn btn-lg btn-info" id="save">Save</button>
@@ -87,14 +116,13 @@
 	  
 	</div> <!-- container -->
       </div> <!-- row-->
-    </div>
-
+     </div>
+    
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
     <script>
 
       localStorage.setItem('docpairpath', '{{user}}/{{batchfile}}/{{pairseq}}');
@@ -129,7 +157,7 @@
       
       function get_all_data() {
 	  var anns={};
-	  anns["label"]=$("input:radio[name=labelradio]:checked").val();
+	  anns["label"]=$("#label").val();
 	  anns["rew1"]=$("#text-rew-left").val();
 	  anns["rew2"]=$("#text-rew-right").val();
 	  anns["user"]=localStorage.getItem('username');
@@ -151,17 +179,51 @@
 	  clean();
       }
 
+      function printmoi() {
+	  alert('Moi')
+      }
 
       $(document).ready(
 	  function() {
 	      $("#save").on("click",save_data);
 	      $("#copyandrewbtn").on("click",copy_to_rewrite);
 	      $("#wipebtn").on("click",wipe_rew);
+	      $("#label").focus();
+	      
 	  }
       );
 
       $(document).on("input",".editdirty",dirty);
       $(document).on("input",".autosave",save_data);
+
+      var keys = {};
+
+      $(document).keydown(function(event) {
+	  keys[event.which] = true;
+	  //<div id="log"></div>
+	  //$( "#log" ).html( event.type + ": " +  event.which );
+	  //$( "#log" ).html( Object.keys(keys).length );
+	  if (keys[17] && keys[49]) { // Ctrl + Alt + z
+	      copy_to_rewrite();
+	      delete keys[17];
+	      delete keys[49];
+	  }
+	  else if (keys[17] && keys[50]) { // Ctrl + Alt + x
+	      wipe_rew();
+	      delete keys[17];
+	      delete keys[50];
+	  }
+	  else if (keys[17] && keys[51]) { // Ctrl + Alt + x
+	      save_data();
+	      delete keys[17];
+	      delete keys[51];
+	  }
+	      
+      });
+
+      $(document).keyup(function(event) {
+	  delete keys[event.which];
+      });
 
       </script>
 
