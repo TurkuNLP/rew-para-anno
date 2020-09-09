@@ -152,6 +152,5 @@ def fetch_document(user,batchfile,pairseq):
 
     annotation=pair.get("annotation",{})
     
-    labels=[("4","4: Paraphrase"), ("3","3: Partial paraphrase"), ("2","2: Related but not paraphrase"), ("1","1: Unrelated"), ("x","x: Skip")]
-    return render_template("doc.html",app_root=APP_ROOT,text1=text1,text2=text2,pairseq=pairseq,batchfile=batchfile,user=user,annotation=annotation,labels=labels,is_last=(pairseq==len(all_batches[user][batchfile].data)-1))
+    return render_template("doc.html",app_root=APP_ROOT,text1=text1,text2=text2,pairseq=pairseq,batchfile=batchfile,user=user,annotation=annotation,is_last=(pairseq==len(all_batches[user][batchfile].data)-1))
 
