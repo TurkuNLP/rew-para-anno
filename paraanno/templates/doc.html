@@ -34,6 +34,7 @@
       
       <div class="row">
 	<div class="col-12 p-1 m-2 ">
+	  <button type="button" class="btn btn-sm" data-toggle="tooltip" data-placement="top" onclick='$("#txt1inp").val($(this).attr("title"));dirty();' title="{{text1}}">Orig</button>
 	  {% if annotation.get("txt1inp") %}
 	  <textarea tabindex="20" class="editdirty" style="width:100%;" id="txt1inp">{{annotation["txt1inp"]}}</textarea>
 	  {% else %}
@@ -42,6 +43,7 @@
 	</div>
 	
 	<div class="col-12 p-1 m-2 mt-4 ">
+	  <button type="button" class="btn btn-sm" data-toggle="tooltip" data-placement="top" onclick='$("#txt2inp").val($(this).attr("title"));dirty();' title="{{text2}}">Orig</button>
 	  {% if annotation.get("txt2inp") %}
 	  <textarea tabindex="20" class="editdirty" style="width:100%;" id="txt2inp">{{annotation["txt2inp"]}}</textarea>
 	  {% else %}
@@ -197,6 +199,8 @@
 	  alert('Moi')
       }
 
+
+      
       $(document).ready(
 	  function() {
 	      $("#save").on("click",save_data);
