@@ -21,6 +21,7 @@ def yield_from_json(fname):
         label = annotation.get("label")
         if not label:
             continue
+        label = "".join(sorted("".join(label.strip().split())))
         text = " --- ".join([example.get("txt1", "EMPTY"), example.get("txt2", "EMPTY")])
         idx = example.get("id")
         if idx is None: # if ID missing, calculate idx using text fields
