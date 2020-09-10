@@ -36,18 +36,18 @@
 	<div class="col-12 p-1 m-2 ">
 	  <button type="button" class="btn btn-sm" data-toggle="tooltip" data-placement="top" onclick='$("#txt1inp").val($(this).attr("title"));dirty();' title="{{text1}}">Orig</button>
 	  {% if annotation.get("txt1inp") %}
-	  <textarea spellcheck="false" tabindex="20" class="editdirty" style="width:100%;" id="txt1inp">{{annotation["txt1inp"]}}</textarea>
+	  <textarea tabindex="20" class="editdirty" style="width:100%;" id="txt1inp">{{annotation["txt1inp"]}}</textarea>
 	  {% else %}
-	  <textarea spellcheck="false" tabindex="20" class="editdirty" style="width:100%;" id="txt1inp">{{text1}}</textarea>
+	  <textarea tabindex="20" class="editdirty" style="width:100%;" id="txt1inp">{{text1}}</textarea>
 	  {% endif %}
 	</div>
 	
 	<div class="col-12 p-1 m-2 mt-4 ">
 	  <button type="button" class="btn btn-sm" data-toggle="tooltip" data-placement="top" onclick='$("#txt2inp").val($(this).attr("title"));dirty();' title="{{text2}}">Orig</button>
 	  {% if annotation.get("txt2inp") %}
-	  <textarea spellcheck="false" tabindex="20" class="editdirty" style="width:100%;" id="txt2inp">{{annotation["txt2inp"]}}</textarea>
+	  <textarea tabindex="20" class="editdirty" style="width:100%;" id="txt2inp">{{annotation["txt2inp"]}}</textarea>
 	  {% else %}
-	  <textarea spellcheck="false" tabindex="20" class="editdirty" style="width:100%;" id="txt2inp">{{text2}}</textarea>
+	  <textarea tabindex="20" class="editdirty" style="width:100%;" id="txt2inp">{{text2}}</textarea>
 	  {% endif %}
 	</div>
       </div> <!-- row-->
@@ -104,11 +104,11 @@
       
       <div class="row">
 	<div class="col-12 p-1 m-2" style="">
-	  <textarea spellcheck="false" class="editdirty" style="width:100%;"  id="text-rew-left">{% if "rew1" in annotation %}{{annotation["rew1"]}}{% endif %}</textarea>
+	  <textarea class="editdirty" style="width:100%;"  id="text-rew-left">{% if "rew1" in annotation %}{{annotation["rew1"]}}{% endif %}</textarea>
 	</div>
 	
 	<div class="col-12 p-1 m-2" style="">
-	  <textarea spellcheck="false" class="editdirty" style="width:100%;"  id="text-rew-right">{% if "rew2" in annotation %}{{annotation["rew2"]}}{% endif %}</textarea>
+	  <textarea class="editdirty" style="width:100%;"  id="text-rew-right">{% if "rew2" in annotation %}{{annotation["rew2"]}}{% endif %}</textarea>
 	</div>
 
       </div> <!-- row-->
