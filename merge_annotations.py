@@ -53,6 +53,19 @@ def align(files):
                         examples[idx].append(example)
         return examples
         
+        
+def resolve_input_edits(annotations):
+        text_inp_1 = [ann["annotation"]["txt1inp"] if "txt1inp" in ann["annotation"] else ann["txt1"] for ann in annotations]
+        text_inp_2 = [ann["annotation"]["txt2inp"] if "txt2inp" in ann["annotation"] else ann["txt2"] for ann in annotations]
+        if len(set(text_inp_1)) == 1:
+                text_inp_1 = text_inp_1[:1]
+        text_inp_1 = "\n".join(text_inp_1)
+        if len(set(text_inp_2)) == 1:
+                text_inp_2 = text_inp_2[:1]
+        text_inp_2 = "\n".join(text_inp_2)
+        return text_inp_1, text_inp_2
+                        
+        
 def merge(aligned_data, min_annotators=3, min_consensus=0.75):
         # min_annotators: do not automatically resolve if less than this annotated
         # min_consensus: automatically resolve if more than 75% agree
@@ -62,6 +75,7 @@ def merge(aligned_data, min_annotators=3, min_consensus=0.75):
         skipped = 0
         for idx, annotations in aligned_data.items():
                 annotated_labels = [ann["annotation"]["label"] for ann in annotations]
+                text_inp_1, text_inp_2 = resolve_input_edits(annotations)
                 if len(annotated_labels) < min_annotators:
                         annotated_labels.append("???")
                         label = "|".join(annotated_labels)
@@ -81,6 +95,8 @@ def merge(aligned_data, min_annotators=3, min_consensus=0.75):
                 # create new json
                 example = annotations[0]
                 example["annotation"]["label"] = label
+                example["annotation"]["txt1inp"] = text_inp_1
+                example["annotation"]["txt2inp"] = text_inp_2
                 example["annotation"]["rew1"] = ""
                 example["annotation"]["rew2"] = ""
                 example["annotation"]["user"] = "Merged"
@@ -101,9 +117,16 @@ def main(args):
     
     # print stats
     full_agreement, consensus_agreement, skipped = stats
-    print(f"Full agreement: {full_agreement} ({full_agreement/(len(merged)-skipped)*100}%)", file=sys.stderr)
-    print(f"Concensus agreement: {consensus_agreement} ({consensus_agreement/(len(merged)-skipped)*100}%)", file=sys.stderr)
-    print(f"Total: {len(merged)-skipped}", file=sys.stderr)
+    total = len(merged)-skipped
+    if total == 0:
+        print(print(f"Skipped (not enough annotations for agreement score): {skipped}", file=sys.stderr))
+        print(f"Total: {total}", file=sys.stderr)
+        return
+        
+    
+    print(f"Full agreement: {full_agreement} ({full_agreement/total*100}%)", file=sys.stderr)
+    print(f"Concensus agreement: {consensus_agreement} ({consensus_agreement/total*100}%)", file=sys.stderr)
+    print(f"Total: {total}", file=sys.stderr)
     print(f"Skipped (not enough annotations): {skipped}", file=sys.stderr)
 
 
