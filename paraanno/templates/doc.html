@@ -221,20 +221,23 @@
 	  //<div id="log"></div>
 	  //$( "#log" ).html( event.type + ": " +  event.which );
 	  //$( "#log" ).html( Object.keys(keys).length );
-	  if (keys[17] && keys[49]) { // Ctrl + Alt + z
+	  if (keys[17] && keys[16] && keys[49]) { // Ctrl + Shift + 1
 	      copy_to_rewrite();
 	      delete keys[17];
+	      delete keys[16];
 	      delete keys[49];
 	  }
-	  else if (keys[17] && keys[50]) { // Ctrl + Alt + x
+	  else if (keys[17] && keys[16] && keys[51]) { // Ctrl + Shift + 3
 	      wipe_rew();
 	      delete keys[17];
-	      delete keys[50];
+	      delete keys[16];
+	      delete keys[51];
 	  }
-	  else if (keys[17] && keys[51]) { // Ctrl + Alt + x
+	  else if (keys[17] && keys[16] && keys[52]) { // Ctrl + Shift + 4
 	      save_data();
 	      delete keys[17];
-	      delete keys[51];
+	      delete keys[16];
+	      delete keys[52];
 	  }
 	      
       });
