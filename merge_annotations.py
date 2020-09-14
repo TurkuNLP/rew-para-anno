@@ -64,6 +64,17 @@ def resolve_input_edits(annotations):
                 text_inp_2 = text_inp_2[:1]
         text_inp_2 = "\n".join(text_inp_2)
         return text_inp_1, text_inp_2
+        
+def resolve_rewrites(annotations):
+        rew1 = [a for a in [ann["annotation"].get("rew1", "") for ann in annotations] if a != ""]
+        rew2 = [a for a in [ann["annotation"].get("rew2", "") for ann in annotations] if a != ""]
+        if len(set(rew1)) == 1:
+                rew1 = rew1[:1]
+        rew1 = "\n".join(rew1)
+        if len(set(rew2)) == 1:
+                rew2 = rew2[:1]
+        rew2 = "\n".join(rew2)
+        return rew1, rew2
                         
         
 def merge(aligned_data, min_annotators=3, min_consensus=0.75):
@@ -76,6 +87,7 @@ def merge(aligned_data, min_annotators=3, min_consensus=0.75):
         for idx, annotations in aligned_data.items():
                 annotated_labels = [ann["annotation"]["label"] for ann in annotations]
                 text_inp_1, text_inp_2 = resolve_input_edits(annotations)
+                rew1, rew2 = resolve_rewrites(annotations)
                 if len(annotated_labels) < min_annotators:
                         annotated_labels.append("???")
                         label = "|".join(annotated_labels)
@@ -97,8 +109,8 @@ def merge(aligned_data, min_annotators=3, min_consensus=0.75):
                 example["annotation"]["label"] = label
                 example["annotation"]["txt1inp"] = text_inp_1
                 example["annotation"]["txt2inp"] = text_inp_2
-                example["annotation"]["rew1"] = ""
-                example["annotation"]["rew2"] = ""
+                example["annotation"]["rew1"] = rew1
+                example["annotation"]["rew2"] = rew2
                 example["annotation"]["user"] = "Merged"
                 example["annotation"]["updated"] = "0001-01-01"
                 consensus.append(example)
