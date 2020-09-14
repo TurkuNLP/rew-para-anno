@@ -199,6 +199,18 @@
 	  alert('Moi')
       }
 
+      
+
+      $('textarea').focus(function (e) {
+      var minrows = 2;
+      var maxrows = 6;
+      var rows = $(this).val().split("\n").length;
+      if (rows < minrows) { rows = minrows; }
+      if (rows > maxrows) { rows = maxrows; }
+      $(this).prop('rows', rows);
+      });
+
+
 
       
       $(document).ready(
@@ -207,7 +219,6 @@
 	      $("#copyandrewbtn").on("click",copy_to_rewrite);
 	      $("#wipebtn").on("click",wipe_rew);
 	      $("#label").focus();
-	      
 	  }
       );
 
