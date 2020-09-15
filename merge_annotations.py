@@ -68,13 +68,18 @@ def resolve_input_edits(annotations):
 def resolve_rewrites(annotations):
         rew1 = [a for a in [ann["annotation"].get("rew1", "") for ann in annotations] if a != ""]
         rew2 = [a for a in [ann["annotation"].get("rew2", "") for ann in annotations] if a != ""]
-        if len(set(rew1)) == 1:
-                rew1 = rew1[:1]
         rew1 = "\n".join(rew1)
-        if len(set(rew2)) == 1:
-                rew2 = rew2[:1]
         rew2 = "\n".join(rew2)
         return rew1, rew2
+        
+def is_flagged(annotations):
+        for ann in annotations:
+                if "annotation" not in ann:
+                        continue
+                flag = ann["annotation"].get("flagged", "false")
+                if flag == "true":
+                        return flag
+        return "false"
                         
         
 def merge(aligned_data, min_annotators=3, min_consensus=0.75):
@@ -84,10 +89,12 @@ def merge(aligned_data, min_annotators=3, min_consensus=0.75):
         full_agreement = 0
         consensus_agreement = 0
         skipped = 0
+        num_annotators = []
         for idx, annotations in aligned_data.items():
                 annotated_labels = [ann["annotation"]["label"] for ann in annotations]
                 text_inp_1, text_inp_2 = resolve_input_edits(annotations)
                 rew1, rew2 = resolve_rewrites(annotations)
+                flag = is_flagged(annotations)
                 if len(annotated_labels) < min_annotators:
                         annotated_labels.append("???")
                         label = "|".join(annotated_labels)
@@ -103,6 +110,7 @@ def merge(aligned_data, min_annotators=3, min_consensus=0.75):
                                 consensus_agreement +=1
                         else:
                                 label = "|".join(annotated_labels)
+                        num_annotators.append(len(annotated_labels))
 
                 # create new json
                 example = annotations[0]
@@ -113,8 +121,9 @@ def merge(aligned_data, min_annotators=3, min_consensus=0.75):
                 example["annotation"]["rew2"] = rew2
                 example["annotation"]["user"] = "Merged"
                 example["annotation"]["updated"] = "0001-01-01"
+                example["annotation"]["flagged"] = flag
                 consensus.append(example)
-        return consensus, (full_agreement, consensus_agreement, skipped)
+        return consensus, (full_agreement, consensus_agreement, skipped, num_annotators)
 
 
 def main(args):
@@ -123,12 +132,12 @@ def main(args):
     
     aligned_examples = align(all_files)
     
-    merged, stats = merge(aligned_examples)
+    merged, stats = merge(aligned_examples, min_annotators=args.min_annotators)
 
     print(json.dumps(merged, sort_keys=True, indent=2, ensure_ascii=False))
     
     # print stats
-    full_agreement, consensus_agreement, skipped = stats
+    full_agreement, consensus_agreement, skipped, annotators = stats
     total = len(merged)-skipped
     if total == 0:
         print(print(f"Skipped (not enough annotations for agreement score): {skipped}", file=sys.stderr))
@@ -139,6 +148,7 @@ def main(args):
     print(f"Full agreement: {full_agreement} ({full_agreement/total*100}%)", file=sys.stderr)
     print(f"Concensus agreement: {consensus_agreement} ({consensus_agreement/total*100}%)", file=sys.stderr)
     print(f"Total: {total}", file=sys.stderr)
+    print(f"Average number of annotators: {sum(annotators)/len(annotators)}", file=sys.stderr)
     print(f"Skipped (not enough annotations): {skipped}", file=sys.stderr)
 
 
@@ -149,6 +159,7 @@ if __name__=="__main__":
     argparser = argparse.ArgumentParser(description='')
     argparser.add_argument('--data-dir', '-d', required=True, help='Top level directory of annotation batches (i.e. /path/to/data if data/batches-Annotator1/batch1.json)')
     argparser.add_argument('--file-name', '-f', required=True, help='Batch file name (i.e. batch1.json if data/batches-Annotator1/batch1.json)')
+    argparser.add_argument('--min-annotators', type=int, default=2, help='How many annotators must be to resolve conflicts automatically if consensus found.')
     args = argparser.parse_args()
 
     main(args)
