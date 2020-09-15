@@ -113,9 +113,11 @@ def jobsinbatch(user,batchfile):
         text2=pair["txt2"]
         ann=pair.get("annotation",{})
         lab=""
+        flag="false"
         if ann:
             lab=ann.get("label","?")
-        pairdata.append((idx,ann.get("updated","not updated"),lab,text1[:50],text2[:50]))
+            flag=ann.get("flagged", "false")
+        pairdata.append((idx,ann.get("updated","not updated"),flag,lab,text1[:50],text2[:50]))
     return render_template("doc_list_in_batch.html",app_root=APP_ROOT,user=user,batchfile=batchfile,pairdata=pairdata)
 
 @app.route("/saveann/<user>/<batchfile>/<pairseq>",methods=["POST"])
