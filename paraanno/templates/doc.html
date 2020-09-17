@@ -42,7 +42,7 @@
 	  {% endif %}
 	</div>
 	
-	<div class="col-12 p-1 m-2 mt-4 ">
+	<div class="col-12 p-1 m-2 mt-1 ">
 	  <button type="button" class="btn btn-sm" data-toggle="tooltip" data-placement="top" onclick='$("#txt2inp").val($(this).attr("title"));dirty();' title="{{text2}}">Orig</button>
 	  {% if annotation.get("txt2inp") %}
 	  <textarea tabindex="20" class="editdirty" style="width:100%;" id="txt2inp">{{annotation["txt2inp"]}}</textarea>
@@ -140,8 +140,8 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script>
 
-      localStorage.setItem('docpairpath', '{{user}}/{{batchfile}}/{{pairseq}}');
-      localStorage.setItem('username','{{user}}');
+      var docpairpath_glob='{{user}}/{{batchfile}}/{{pairseq}}';
+      var username_glob='{{user}}';
 
       function dirty() {
 	  $("#prevdoc").addClass("disabled");
@@ -176,13 +176,13 @@
 	  anns["rew2"]=$("#text-rew-right").val();
 	  anns["txt1inp"]=$("#txt1inp").val();
 	  anns["txt2inp"]=$("#txt2inp").val();
-	  anns["user"]=localStorage.getItem('username');
+	  anns["user"]=username_glob;
 	  return anns;
       }
 
       function save_data() {
 	  var all_data=get_all_data();
-	  var docpairpath = localStorage.getItem('docpairpath');
+	  var docpairpath = docpairpath_glob;
 	  $.ajax({type: 'POST',
 		  url: "{{app_root}}/saveann/"+docpairpath,
 		  data: JSON.stringify(all_data),
