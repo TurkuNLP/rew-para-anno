@@ -71,13 +71,15 @@ def yield_annotations(annotation, document_context1, document_context2):
                 if len(text.strip().split("\n")) != 2:
                         print("WHAAAAAAT????", text, file=sys.stderr)
                 para1, para2 = text.strip().split("\n", 1)
-                focus1 = example.get("focusid_left")
-                focus2 = example.get("focusid_right")
+                focus1 = example.get("focusid_left", "")
+                focus2 = example.get("focusid_right", "")
+                anchor1 = example.get("anchorid_left", "")
+                anchor2 = example.get("anchorid_right", "")
                 
                 find_span(para1, document_context1)
                 find_span(para2, document_context2)
                 
-                d = {"id": calculate_idx(para1+para2), "txt1": para1, "txt2": para2, "document_context1": document_context1, "document_context2": document_context2, "focus1": focus1, "focus2": focus2}
+                d = {"id": calculate_idx(para1+para2), "txt1": para1, "txt2": para2, "document_context1": document_context1, "document_context2": document_context2, "focus1": focus1, "focus2": focus2, "anchor1": anchor1, "anchor2":anchor2, "local_context1": "", "local_context2": ""}
                 yield d
         
 
@@ -120,9 +122,10 @@ def main(args):
     counter = 1
     for segment in yield_segments(args.file_name):
         rew_batch = transfer(segment, metadata) # list of examples in rew format
+        fname = os.path.basename(args.file_name).replace(".json", "")
         
-        with open(f"rew-batch-{os.path.basename(args.file_name)}-part{counter}.json", "w", encoding="utf-8") as f:
-                print(f"Saving to rew-batch-{os.path.basename(args.file_name)}-part{counter}.json", file=sys.stderr)
+        with open(f"rew-batch-{fname}-part{counter}.json", "w", encoding="utf-8") as f:
+                print(f"Saving to rew-batch-{fname}-part{counter}.json", file=sys.stderr)
                 print(json.dumps(rew_batch, sort_keys=True, indent=2, ensure_ascii=False), file=f)
         counter += 1
     
