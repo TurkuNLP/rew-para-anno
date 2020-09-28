@@ -28,10 +28,9 @@ def yield_segments(fname):
         if "annotation" in segment: # if segment not annotated, skip
                 yield segment
         
-def get_document_text(table, doc_id):
+def get_document_text(db_name, table, doc_id):
 
-        #db = sqlitedict.SqliteDict("/home/ginter/pick_ann_data_live_new/all-texts.sqlited", tablename=table, flag="r")
-        db = sqlitedict.SqliteDict("/home/lhchan/data-all-movie/data-15-assigned/all-texts.sqlited", tablename=table, flag="r")
+        db = sqlitedict.SqliteDict(db_name, tablename=table, flag="r")
         
         text = db.get(doc_id, "")
         
@@ -83,13 +82,13 @@ def yield_annotations(annotation, document_context1, document_context2):
                 yield d
         
 
-def transfer(segment, metadata):
+def transfer(args, segment, metadata):
                 
         table1, doc1 = segment.get("d1") # ["subtitle", "1955045028-001500.txt"]
         table2, doc2 = segment.get("d2")
         
-        doc1_text = get_document_text(table1, doc1)
-        doc2_text = get_document_text(table2, doc2)
+        doc1_text = get_document_text(args.text_db, table1, doc1)
+        doc2_text = get_document_text(args.text_db, table2, doc2)
         
         annotation = segment.get("annotation")
         annotation = list(reversed(annotation)) # fix the order
@@ -121,7 +120,9 @@ def main(args):
 
     counter = 1
     for segment in yield_segments(args.file_name):
-        rew_batch = transfer(segment, metadata) # list of examples in rew format
+        rew_batch = transfer(args, segment, metadata) # list of examples in rew format
+        if len(rew_batch)==0:
+                continue
         fname = os.path.basename(args.file_name).replace(".json", "")
         
         with open(f"rew-batch-{fname}-part{counter}.json", "w", encoding="utf-8") as f:
@@ -138,6 +139,7 @@ if __name__=="__main__":
     argparser = argparse.ArgumentParser(description='')
     #argparser.add_argument('--data-dir', '-d', required=True, help='Top level directory of annotation batches (i.e. /path/to/data if data/batches-Annotator1/batch1.json)')
     argparser.add_argument('--file-name', '-f', required=True, help='Batch file name (i.e. /path/to/data/batches-Annotator1/batch1.json)')
+    argparser.add_argument('--text-db', required=True, help='Database name (i.e. /path/to/all-texts.sqlited)')
     args = argparser.parse_args()
 
     main(args)
