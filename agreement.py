@@ -43,7 +43,6 @@ def normalize_label(args, label):
         label = label.replace("i", "")
         label = label.replace("<", "A")
         label = label.replace(">", "A")
-        print(label)
         return label
          
         
@@ -109,6 +108,8 @@ def calculate_agreement(annotations_1, annotations_2):
         if annotations_1 is None or annotations_2 is None:
                 return 0, 0, (None, None)
         common_keys = set(annotations_1.keys()) & set(annotations_2.keys())
+        if not common_keys:
+                return 0, 0, (None, [])
         agree = 0
         labels_1 = []
         labels_2 = []
@@ -119,16 +120,18 @@ def calculate_agreement(annotations_1, annotations_2):
                         agree += 1
         all_labels = list(set(labels_1+labels_2))
         all_labels.sort(key = lambda i: sort_order.index(i))
-        return agree, len(common_keys), (confusion_matrix(labels_1, labels_2, labels=all_labels), all_labels)
+        conf = confusion_matrix(labels_1, labels_2, labels=all_labels)
+        return agree, len(common_keys), (conf, all_labels)
         
-def print_agreement(agree, total, ann1, ann2, conf):
+def print_agreement(args, agree, total, ann1, ann2, conf):
         if total == 0:
                 print(f"No annotations for pair {ann1} – {ann2}.")
                 return
         print(f"{ann1} – {ann2}: {agree/total*100:.2f}% (N={total})")
-        conf, all_labels = conf
-        print(all_labels) 
-        print(conf)                  
+        if args.show_conf:
+                conf, all_labels = conf
+                print(all_labels) 
+                print(conf)                  
                         
         
 def agreement(args, annotations):
@@ -152,7 +155,7 @@ def agreement(args, annotations):
                         examples_1 = annotations.get((ann1, w), None)
                         examples_2 = annotations.get((ann2, w), None)
                         agree, total, conf = calculate_agreement(examples_1, examples_2)
-                        print_agreement(agree, total, ann1, ann2, conf)
+                        print_agreement(args, agree, total, ann1, ann2, conf)
                         
         # TOTAL #
         print("\nTotal agreement:\n")
@@ -164,7 +167,7 @@ def agreement(args, annotations):
                 examples_2 = {k: v for d in examples_2 for k, v in d.items()}
                 
                 agree, total, conf = calculate_agreement(examples_1, examples_2)
-                print_agreement(agree, total, ann1, ann2, conf)
+                print_agreement(args, agree, total, ann1, ann2, conf)
 
         
         
@@ -189,6 +192,7 @@ if __name__=="__main__":
     argparser.add_argument('--annotators', type=str, help='Comma separated list of annotators. If not defined, take all.')
     argparser.add_argument('--weekly', action="store_true", default=False, help='Print weekly statistics (not file based).')
     argparser.add_argument('--relaxed', action="store_true", default=False, help='Relaxed label comparison (4 / 4 arrow / 3 / 2 / 1)')
+    argparser.add_argument('--show_conf', action="store_true", default=False, help='Show confusion matrix')
 
     args = argparser.parse_args()
 
