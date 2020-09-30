@@ -55,8 +55,8 @@ def align(files):
         
         
 def resolve_input_edits(annotations):
-        text_inp_1 = [ann["annotation"]["txt1inp"] if "txt1inp" in ann["annotation"] else ann["txt1"] for ann in annotations]
-        text_inp_2 = [ann["annotation"]["txt2inp"] if "txt2inp" in ann["annotation"] else ann["txt2"] for ann in annotations]
+        text_inp_1 = [ann["annotation"]["txt1inp"].strip() if "txt1inp" in ann["annotation"] else ann["txt1"] for ann in annotations]
+        text_inp_2 = [ann["annotation"]["txt2inp"].strip() if "txt2inp" in ann["annotation"] else ann["txt2"] for ann in annotations]
         if len(set(text_inp_1)) == 1:
                 text_inp_1 = text_inp_1[:1]
         text_inp_1 = "\n".join(text_inp_1)
