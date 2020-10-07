@@ -156,7 +156,26 @@ def fetch_document(user,batchfile,pairseq):
     
     return render_template("doc.html",app_root=APP_ROOT,text1=text1,text2=text2,pairseq=pairseq,batchfile=batchfile,user=user,annotation=annotation,is_last=(pairseq==len(all_batches[user][batchfile].data)-1))
     
-    
+
+
+@app.route("/flags")
+def flags():
+    global all_batches
+    pairdata=[]
+    for user in all_batches.keys():
+        for batchfile in all_batches[user].keys():
+            pairs=all_batches[user][batchfile].data
+            for idx,pair in enumerate(pairs):
+                text1=pair["txt1"]
+                text2=pair["txt2"]
+                ann=pair.get("annotation",{})
+                if ann:
+                    lab=ann.get("label","?")
+                    flag=ann.get("flagged", "false")
+                    if flag=="true":
+                        pairdata.append((user, batchfile, idx,ann.get("updated","not updated"),flag,lab,text1[:50],text2[:50]))
+    return render_template("flags.html",app_root=APP_ROOT,pairdata=pairdata)
+ 
     
 @app.route("/ann/<user>/<batchfile>/<pairseq>/context")
 def fetch_context(user,batchfile,pairseq):
