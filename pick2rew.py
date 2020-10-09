@@ -9,9 +9,11 @@ import sqlitedict
 
 
 
-def read_files(args):
-    json_files = glob.glob(os.path.join(args.data_dir, "**", args.file_name), recursive=True)
-    return json_files
+
+def read_annotated_files(args):
+    json_files = glob.glob(os.path.join(args.annotated_batches, "**", "*.json"), recursive=True)
+    json_files = [os.path.basename(fn) for fn in json_files]
+    return list(set(json_files))
 
         
 def calculate_idx(text):
@@ -22,11 +24,11 @@ def yield_segments(fname):
 
     with open(fname, "rt", encoding="utf-8") as f:
         data = json.load(f)
-    for segment in data: # one 15min segment of a movie
+    for i, segment in enumerate(data): # one 15min segment of a movie
         # d1, d2, sim, (updated, annotation)
         annotation = segment.get("annotation", None)
         if "annotation" in segment: # if segment not annotated, skip
-                yield segment
+                yield i, segment
         
 def get_document_text(db_name, table, doc_id):
 
@@ -45,7 +47,8 @@ def find_span(para, doc_text):
         doc_text_alpha = "".join([c for c in doc_text.lower() if c.isalpha()])
         para_alpha = "".join([c for c in para.lower() if c.isalpha()])
         if doc_text_alpha.count(para_alpha) > 1:
-                print("Ambiguous paraphrase:", doc_text_alpha.count(para_alpha), para, file=sys.stderr)
+                pass
+                #print("Ambiguous paraphrase:", doc_text_alpha.count(para_alpha), para, file=sys.stderr)
         
 def yield_annotations(annotation, document_context1, document_context2):
 
@@ -109,6 +112,9 @@ def transfer(args, segment, metadata):
 def main(args):
 
 
+    annotated = read_annotated_files(args)
+
+
 #    "meta": {
 #      "A-sim": 0.5622275607964768,
 #      "Score": 0.23459273771768144,
@@ -119,14 +125,19 @@ def main(args):
     metadata = {"source_files": args.file_name, "srcinfo": "pick2para.py"}
 
     counter = 1
-    for segment in yield_segments(args.file_name):
+    for idx, segment in yield_segments(args.file_name):
         rew_batch = transfer(args, segment, metadata) # list of examples in rew format
         if len(rew_batch)==0:
                 continue
         fname = os.path.basename(args.file_name).replace(".json", "")
+        fname = f"rew-batch-{fname}-part-{idx}.json"
+        if fname in annotated:
+                print("Skipping already annotated file", fname, file=sys.stderr)
+                continue
         
-        with open(f"rew-batch-{fname}-part{counter}.json", "w", encoding="utf-8") as f:
-                print(f"Saving to rew-batch-{fname}-part{counter}.json", file=sys.stderr)
+        
+        with open(fname, "w", encoding="utf-8") as f:
+                print(f"Saving to", fname, file=sys.stderr)
                 print(json.dumps(rew_batch, sort_keys=True, indent=2, ensure_ascii=False), file=f)
         counter += 1
     
@@ -140,8 +151,9 @@ if __name__=="__main__":
     #argparser.add_argument('--data-dir', '-d', required=True, help='Top level directory of annotation batches (i.e. /path/to/data if data/batches-Annotator1/batch1.json)')
     argparser.add_argument('--file-name', '-f', required=True, help='Batch file name (i.e. /path/to/data/batches-Annotator1/batch1.json)')
     argparser.add_argument('--text-db', required=True, help='Database name (i.e. /path/to/all-texts.sqlited)')
+    argparser.add_argument('--annotated-batches', required=True, help='Top level directory of annotated batches. Do not create if already exists here. (i.e. /path/to/ann_data)')
     args = argparser.parse_args()
 
     main(args)
     
-    # Usage: python pick2rew.py -f /home/ginter/pick_ann_data_live_old/batches-JennaK/12007.json > sub_ann_train_000200.json
+    # Usage: python pick2rew.py -f /home/ginter/pick_ann_data_live_old/batches-JennaK/12007.json --text-db /home/ginter/pick_ann_data_live_old/all-texts.sqlited --annotated-batches /home/ginter/ann_data > sub_ann_train_000200.json
