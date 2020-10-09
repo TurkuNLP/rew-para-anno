@@ -174,6 +174,7 @@ def flags():
                     flag=ann.get("flagged", "false")
                     if flag=="true":
                         pairdata.append((user, batchfile, idx,ann.get("updated","not updated"),flag,lab,text1[:50],text2[:50]))
+    pairdata = sorted(pairdata, key = lambda x: (x[3],x[1]), reverse=True)
     return render_template("flags.html",app_root=APP_ROOT,pairdata=pairdata)
  
     
