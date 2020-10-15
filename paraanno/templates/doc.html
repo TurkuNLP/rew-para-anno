@@ -201,11 +201,9 @@
 		  data: JSON.stringify(all_data),
 		  contentType: 'application/json',
 		  error: function () { $("#save").css("background-color","red"); },
-		  success: function () { $("#save").css("background-color","green"); }
+		  success: function () { $("#save").css("background-color","green"); clean(); }
 		 }
 	  );
-	      
-	  clean();
       }
 
       function printmoi() {
