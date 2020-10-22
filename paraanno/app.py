@@ -53,10 +53,12 @@ class Batch:
         for pair in self.data:
             if "annotation" in pair:
                 if "label" in pair["annotation"]:
-                    if pair["annotation"]["label"]!="x":
-                        completed += 1
-                    else:
+                    if pair["annotation"]["label"]=="x":
                         skipped += 1
+                    elif "|" in pair["annotation"]["label"] or pair["annotation"]["label"].strip() == "": # label not completed
+                        left+=1
+                    else:
+                        completed += 1
                 else:
                     left += 1
             else:
