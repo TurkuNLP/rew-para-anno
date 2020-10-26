@@ -53,10 +53,12 @@ class Batch:
         for pair in self.data:
             if "annotation" in pair:
                 if "label" in pair["annotation"]:
-                    if pair["annotation"]["label"]!="x":
-                        completed += 1
-                    else:
+                    if pair["annotation"]["label"]=="x":
                         skipped += 1
+                    elif "|" in pair["annotation"]["label"] or pair["annotation"]["label"].strip() == "": # label not completed
+                        left+=1
+                    else:
+                        completed += 1
                 else:
                     left += 1
             else:
@@ -174,7 +176,26 @@ def flags():
                     flag=ann.get("flagged", "false")
                     if flag=="true":
                         pairdata.append((user, batchfile, idx,ann.get("updated","not updated"),flag,lab,text1[:50],text2[:50]))
-    return render_template("flags.html",app_root=APP_ROOT,pairdata=pairdata)
+    pairdata = sorted(pairdata, key = lambda x: (x[3],x[1]), reverse=True)
+    return render_template("all_flags.html",app_root=APP_ROOT,pairdata=pairdata)
+
+@app.route("/ann/<user>/flags")
+def user_flags(user):
+    global all_batches
+    pairdata=[]
+    for batchfile in all_batches[user].keys():
+        pairs=all_batches[user][batchfile].data
+        for idx,pair in enumerate(pairs):
+            text1=pair["txt1"]
+            text2=pair["txt2"]
+            ann=pair.get("annotation",{})
+            if ann:
+                lab=ann.get("label","?")
+                flag=ann.get("flagged", "false")
+                if flag=="true":
+                    pairdata.append((user, batchfile, idx,ann.get("updated","not updated"),flag,lab,text1[:50],text2[:50]))
+    pairdata = sorted(pairdata, key = lambda x: x[3], reverse=True)
+    return render_template("user_flags.html",app_root=APP_ROOT,user=user,pairdata=pairdata)
  
     
 @app.route("/ann/<user>/<batchfile>/<pairseq>/context")
