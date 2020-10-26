@@ -4,6 +4,7 @@ import argparse
 import glob
 import os
 import json
+import datetime
 from collections import Counter
 
 def read_files(args):
@@ -80,11 +81,20 @@ def is_flagged(annotations):
                 if flag == "true":
                         return flag
         return "false"
+
+def resolve_comments(annotations):
+        comm = [a for a in [ann["annotation"].get("flagcomment", "") for ann in annotations] if a != ""]
+        comm = "\n".join(comm)
+
+        return comm
                         
         
-def merge(aligned_data, min_annotators=3, min_consensus=0.75):
+def merge(aligned_data, min_annotators=3, min_consensus=0.75, resolve_consensus=False):
         # min_annotators: do not automatically resolve if less than this annotated
         # min_consensus: automatically resolve if more than 75% agree
+        
+        timestamp = datetime.datetime.now().isoformat()
+        
         consensus = []
         full_agreement = 0
         consensus_agreement = 0
@@ -95,22 +105,24 @@ def merge(aligned_data, min_annotators=3, min_consensus=0.75):
                 text_inp_1, text_inp_2 = resolve_input_edits(annotations)
                 rew1, rew2 = resolve_rewrites(annotations)
                 flag = is_flagged(annotations)
-                if len(annotated_labels) < min_annotators:
-                        annotated_labels.append("???")
-                        label = "|".join(annotated_labels)
-                        skipped += 1
-                else:
-                        # check consensus
-                        majority, count = Counter(annotated_labels).most_common(1)[0]
-                        agreement_score = count/len(annotated_labels)
-                        if agreement_score >= 0.75:
-                                label = majority
-                                if agreement_score == 1.0:
-                                        full_agreement +=1
-                                consensus_agreement +=1
+                comment = resolve_comments(annotations)
+                
+                # check consensus
+                majority, count = Counter(annotated_labels).most_common(1)[0]
+                agreement_score = count/len(annotated_labels)
+                if agreement_score >= 0.75:
+                        if agreement_score == 1.0:
+                                full_agreement +=1
+                        consensus_agreement +=1
+                        
+                        # resolve consensus
+                        if resolve_consensus==True and len(annotated_labels) >= min_annotators:
+                            label = majority
                         else:
-                                label = "|".join(annotated_labels)
-                        num_annotators.append(len(annotated_labels))
+                            label = "|".join(annotated_labels)
+                else:
+                        label = "|".join(annotated_labels)
+                num_annotators.append(len(annotated_labels))
 
                 # create new json
                 example = annotations[0]
@@ -120,8 +132,10 @@ def merge(aligned_data, min_annotators=3, min_consensus=0.75):
                 example["annotation"]["rew1"] = rew1
                 example["annotation"]["rew2"] = rew2
                 example["annotation"]["user"] = "Merged"
-                example["annotation"]["updated"] = "0001-01-01"
+                example["annotation"]["updated"] = timestamp
                 example["annotation"]["flagged"] = flag
+                if flag == True:
+                    example["annotation"]["flagcomment"] = comment
                 consensus.append(example)
         return consensus, (full_agreement, consensus_agreement, skipped, num_annotators)
 
@@ -129,10 +143,11 @@ def merge(aligned_data, min_annotators=3, min_consensus=0.75):
 def main(args):
 
     all_files = read_files(args) # all files from different annotators
+    print("Files:",all_files, file=sys.stderr)
     
     aligned_examples = align(all_files)
     
-    merged, stats = merge(aligned_examples, min_annotators=args.min_annotators)
+    merged, stats = merge(aligned_examples, min_annotators=args.min_annotators, resolve_consensus=args.resolve_consensus)
 
     print(json.dumps(merged, sort_keys=True, indent=2, ensure_ascii=False))
     
@@ -160,6 +175,7 @@ if __name__=="__main__":
     argparser.add_argument('--data-dir', '-d', required=True, help='Top level directory of annotation batches (i.e. /path/to/data if data/batches-Annotator1/batch1.json)')
     argparser.add_argument('--file-name', '-f', required=True, help='Batch file name (i.e. batch1.json if data/batches-Annotator1/batch1.json)')
     argparser.add_argument('--min-annotators', type=int, default=2, help='How many annotators must be to resolve conflicts automatically if consensus found.')
+    argparser.add_argument('--resolve-consensus', action="store_true", default=False, help='Automatically resolve consensus (default=False)')
     args = argparser.parse_args()
 
     main(args)
