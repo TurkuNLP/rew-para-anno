@@ -24,6 +24,8 @@ def yield_segments(fname):
 
     with open(fname, "rt", encoding="utf-8") as f:
         data = json.load(f)
+        if isinstance(data, dict): # new format, TODO: transfer metadata?
+            data = data["segments"]
     for i, segment in enumerate(data): # one 15min segment of a movie
         # d1, d2, sim, (updated, annotation)
         annotation = segment.get("annotation", None)
@@ -157,3 +159,11 @@ if __name__=="__main__":
     main(args)
     
     # Usage: python pick2rew.py -f /home/ginter/pick_ann_data_live_old/batches-JennaK/12007.json --text-db /home/ginter/pick_ann_data_live_old/all-texts.sqlited --annotated-batches /home/ginter/ann_data > sub_ann_train_000200.json
+    
+    
+    
+    # in /home/jmnybl/git_checkout/rew-para-anno/batches-pick2rew
+    
+    # cd batches-HannaMari ;  for f in /home/ginter/pick_ann_data_live_old/batches-HannaMari/*.json ; do echo $f ; python ../../pick2rew.py -f $f --text-db /home/ginter/pick_ann_data_live_new/all-texts.sqlited --annotated-batches /home/ginter/ann_data ; done
+
+
