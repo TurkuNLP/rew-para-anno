@@ -12,7 +12,7 @@ from sklearn.metrics import confusion_matrix
 from natsort import natsorted
 
 
-sort_order = ['4', '4s', '4i', '4A', '4<', '4>','4<i', '4>i','4<s', '4>s','4<is', '4>is', '3', '2', '1']
+sort_order = ['4', '4s', '4i', '4is', '4A', '4<', '4>','4<i', '4>i','4<s', '4>s','4<is', '4>is', '3', '2', '1']
 
 def read_files(args):
     json_files = glob.glob(os.path.join(args.data_dir, "**", "*.json"), recursive=True)

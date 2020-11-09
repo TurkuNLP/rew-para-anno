@@ -45,17 +45,34 @@
 	</div>
       </div>
       
-      <div class="row">
-	<div class="col-6 p-3 border" style="height:80vh;max-height:80vh;overflow-y:scroll;" id="text-left">
-	  {% for txt, spanclass in left_spandata %}<span class="matchspan" id="lspan{{loop.index}}" mlen="{{spanclass}}">{{txt | replace('\n', '<br/><br/>')|safe}}</span>{% endfor %}
+     <div class="row">
+	<div class="col-6 p-3 border" style="height:50vh;max-height:50vh;overflow-y:scroll;" id="text-left">
+	  {%- for txt, spanclass in left_spandata -%}
+	  {%- set lines=txt.split("\n") -%}
+	  {%- set currentspan=loop.index -%}
+	  <span class="matchspan" id="lspan{{loop.index}}" mlen="{{spanclass}}">
+	    {%- for l in lines -%}
+	    <span id="lspan-{{currentspan}}-{{loop.index}}">{{l|safe}}</span>{% if not loop.last %}<br/><br/>{% endif %}
+	    {%- endfor -%}
+	  </span>
+	  {%- endfor -%}
+
+	  <!-- {% for txt, spanclass in left_spandata %}<span class="matchspan" id="lspan{{loop.index}}" mlen="{{spanclass}}">{{txt | replace('\n', '<br/><br/>')|safe}}</span>{% endfor %} -->
 	</div>
 	
-	<div class="col-6 p-3 border" style="height:80vh;max-height:80vh;overflow-y:scroll;" id="text-right">
-	  {% for txt, spanclass in right_spandata %}<span class="matchspan" id="rspan{{loop.index}}" mlen="{{spanclass}}">{{txt| replace('\n', '<br/><br/>')|safe}}</span>{% endfor %}
+	<div class="col-6 p-3 border" style="height:50vh;max-height:50vh;overflow-y:scroll;" id="text-right">
+	  {%- for txt, spanclass in right_spandata -%}
+	  {%- set lines=txt.split("\n") -%}
+	  {%- set currentspan=loop.index -%}
+	  <span class="matchspan" id="rspan{{loop.index}}" mlen="{{spanclass}}">
+	    {%- for l in lines -%}
+	    <span id="rspan-{{currentspan}}-{{loop.index}}">{{l|safe}}</span>{% if not loop.last %}<br/><br/>{% endif %}
+	    {%- endfor -%}
+	  </span>
+	  {%- endfor -%}
 	</div>
 
       </div> <!-- row-->
-
       
 
 
@@ -70,8 +87,10 @@
     <script>
 
       var docpairpath_glob='{{user}}/{{batchfile}}/{{pairseq}}';
-      var focus_left = '{{focus_left}}';
-      var focus_right = '{{focus_right}}';
+      var selection_left_min = '{{selection_left_min}}';
+      var selection_left_max = '{{selection_left_max}}';
+      var selection_right_min = '{{selection_right_min}}';
+      var selection_right_max = '{{selection_right_max}}';
 
       function dirty() {
 	  $("#prevdoc").addClass("disabled");
@@ -135,12 +154,14 @@
       function focuspair() {
 	  //lid=$(this).attr("focusid-left");
 	  //rid=$(this).attr("focusid-right");
-	  console.log(focus_left);
-	  console.log(focus_right);
-	  document.getElementById(focus_left).scrollIntoView();
-	  document.getElementById(focus_left).style.color = "red";
-	  document.getElementById(focus_right).scrollIntoView();
-	  document.getElementById(focus_right).style.color = "red";
+	  //console.log(selection_left_min);
+	  //console.log(selection_left_max);
+	  //console.log(selection_right_min);
+	  //console.log(selection_right_max);
+	  document.getElementById(selection_left_min).scrollIntoView();
+	  document.getElementById(selection_left_min).style.color = "red";
+	  document.getElementById(selection_right_min).scrollIntoView();
+	  document.getElementById(selection_right_min).style.color = "red";
       }
 	  
       

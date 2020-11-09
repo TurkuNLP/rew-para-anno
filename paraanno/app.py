@@ -9,6 +9,7 @@ import json
 import datetime
 import difflib
 import html
+import re
 
 
 app = Flask(__name__)
@@ -196,7 +197,28 @@ def user_flags(user):
                     pairdata.append((user, batchfile, idx,ann.get("updated","not updated"),flag,lab,text1[:50],text2[:50]))
     pairdata = sorted(pairdata, key = lambda x: x[3], reverse=True)
     return render_template("user_flags.html",app_root=APP_ROOT,user=user,pairdata=pairdata)
- 
+
+
+def get_focus_region(focus, anchor):
+
+    try: 
+        _, f_span, f_line = focus.split("-")
+        _, a_span, a_line = anchor.split("-")
+    except: # old format
+        return None, None
+    if int(f_span) < int(a_span):
+        return focus, anchor
+    elif int(a_span) < int(f_span):
+        return anchor, focus
+    # span id equal
+    if int(f_line) < int(a_line):
+        return focus, anchor
+    
+    return  anchor, focus # returns min, max
+        
+        
+
+
     
 @app.route("/ann/<user>/<batchfile>/<pairseq>/context")
 def fetch_context(user,batchfile,pairseq):
@@ -206,13 +228,26 @@ def fetch_context(user,batchfile,pairseq):
 
     text1=pair.get("document_context1", "")
     text2=pair.get("document_context2", "")
+    
+    text1=re.sub(r"\n+","\n",text1)
+    text2=re.sub(r"\n+","\n",text2)
+
+    text1=text1.replace("<i>"," ").replace("</i>"," ")
+    text2=text2.replace("<i>"," ").replace("</i>"," ")
+
+    text1=re.sub(r" +"," ",text1)
+    text2=re.sub(r" +"," ",text2)
 
     blocks=matches(text1,text2,15) #matches are (idx1,idx2,len)
     spandata1,min1,max1=build_spans(text1,list((b[0],b[2]) for b in blocks))
     spandata2,min2,max2=build_spans(text2,list((b[1],b[2]) for b in blocks))
     
+    # focus region
+    left_min, left_max = get_focus_region(pair.get("focus1", None), pair.get("anchor1", None))
+    right_min, right_max = get_focus_region(pair.get("focus2", None), pair.get("anchor2", None))
     
-    return render_template("context.html", app_root=APP_ROOT, left_text=text1, right_text=text2, left_spandata=spandata1, right_spandata=spandata2, pairseq=pairseq, batchfile=batchfile, user=user, min_mlen=min(min1,min2), max_mlen=max(max1,max2)+1, mlenv=min(max(max1,max2),30), is_last=(pairseq==len(all_batches[user][batchfile].data)-1), focus_left=pair.get("focus1", ""), focus_right=pair.get("focus2", ""))
+    
+    return render_template("context.html", app_root=APP_ROOT, left_text=text1, right_text=text2, left_spandata=spandata1, right_spandata=spandata2, pairseq=pairseq, batchfile=batchfile, user=user, min_mlen=min(min1,min2), max_mlen=max(max1,max2)+1, mlenv=min(max(max1,max2),30), is_last=(pairseq==len(all_batches[user][batchfile].data)-1), selection_left_min=left_min, selection_left_max=left_max, selection_right_min=right_min, selection_right_max=right_max)
     
    
 
