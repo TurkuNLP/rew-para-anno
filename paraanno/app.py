@@ -139,6 +139,7 @@ def fetch_document(user,batchfile,pairseq):
     global all_batches
     pairseq=int(pairseq)
     pair=all_batches[user][batchfile].data[pairseq]
+    name=pair.get("meta", {}).get("name", "").replace("\\", "").strip()
     
     # {
     # "d1": [
@@ -157,7 +158,7 @@ def fetch_document(user,batchfile,pairseq):
 
     annotation=pair.get("annotation",{})
     
-    return render_template("doc.html",app_root=APP_ROOT,text1=text1,text2=text2,pairseq=pairseq,batchfile=batchfile,user=user,annotation=annotation,is_last=(pairseq==len(all_batches[user][batchfile].data)-1))
+    return render_template("doc.html",app_root=APP_ROOT,text1=text1,text2=text2,pairseq=pairseq,batchfile=batchfile,user=user,annotation=annotation,name=name,is_last=(pairseq==len(all_batches[user][batchfile].data)-1))
     
 
 
