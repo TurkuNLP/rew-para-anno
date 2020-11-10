@@ -24,13 +24,17 @@ def yield_segments(fname):
 
     with open(fname, "rt", encoding="utf-8") as f:
         data = json.load(f)
-        if isinstance(data, dict): # new format, TODO: transfer metadata?
+        movie_meta = {"name": "", "id": "", "language": ""}
+        if isinstance(data, dict): # new format
+            movie_meta["name"] = data.get("name", "")
+            movie_meta["id"] = data.get("id", "")
+            movie_meta["language"] = data.get("language", "")
             data = data["segments"]
     for i, segment in enumerate(data): # one 15min segment of a movie
         # d1, d2, sim, (updated, annotation)
         annotation = segment.get("annotation", None)
         if "annotation" in segment: # if segment not annotated, skip
-                yield i, segment
+                yield i, movie_meta, segment
         
 def get_document_text(db_name, table, doc_id):
 
@@ -92,8 +96,13 @@ def transfer(args, segment, metadata):
         table1, doc1 = segment.get("d1") # ["subtitle", "1955045028-001500.txt"]
         table2, doc2 = segment.get("d2")
         
-        doc1_text = get_document_text(args.text_db, table1, doc1)
-        doc2_text = get_document_text(args.text_db, table2, doc2)
+        doc1_text = segment.get("d1_text", "")
+        doc2_text = segment.get("d2_text", "")
+        
+        if doc1_text == "":
+            doc1_text = get_document_text(args.text_db, table1, doc1)
+        if doc2_text == "":
+            doc2_text = get_document_text(args.text_db, table2, doc2)
         
         annotation = segment.get("annotation")
         annotation = list(reversed(annotation)) # fix the order
@@ -127,7 +136,9 @@ def main(args):
     metadata = {"source_files": args.file_name, "srcinfo": "pick2para.py"}
 
     counter = 1
-    for idx, segment in yield_segments(args.file_name):
+    for idx, movie_meta, segment in yield_segments(args.file_name):
+        for key in movie_meta:
+            metadata[key] = movie_meta[key]
         rew_batch = transfer(args, segment, metadata) # list of examples in rew format
         if len(rew_batch)==0:
                 continue
