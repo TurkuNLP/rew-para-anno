@@ -84,7 +84,20 @@ init()
 @app.route('/')
 def hello_world():
     global all_batches
-    return render_template("index.html",app_root=APP_ROOT,users=sorted(all_batches.keys()))
+
+    batch_stats = {} # user -> (completed, non-completed)
+    for user, batches in all_batches.items():
+        no_completed, no_left = 0, 0
+        for batch in batches.values():
+            if batch.get_anno_stats[0]==batch.get_batch_len:
+                no_completed += 1
+            else:
+                no_left += 1
+        batch_stats[user] = (no_completed, no_left)
+    return render_template("index.html",
+                           app_root=APP_ROOT,
+                           users=sorted(all_batches.keys()),
+                           stats=batch_stats)
 
 @app.route("/ann/<user>")
 def batchlist(user):
