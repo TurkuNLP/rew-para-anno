@@ -77,7 +77,7 @@ def yield_from_json(args, fname):
         if not annotation:
             continue
         label = annotation.get("label")
-        if not label or label.lower() == "x":
+        if not label or label.lower() == "x" or "|" in label:
             continue
         label = normalize_label(args, label)
         #text = " --- ".join([example.get("txt1", "EMPTY"), example.get("txt2", "EMPTY")])

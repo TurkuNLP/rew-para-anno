@@ -38,7 +38,7 @@ def main():
     print(f"Completed {len(completed_files)} out of {len(files)} total files.")
     print("Archive completed:")
     print()
-    print(f"mv {' '.join(completed_files)} archived/ ; git add {' '.join(completed_files)} ; git add archived/* ; git commit -m 'Jenna, commit completed'")
+    print(f"mv {' '.join(completed_files)} archived/ ; git add {' '.join(completed_files)} ; git add archived/* ; git commit -m 'Jenna, archive completed'")
     print()
                 
 main()
