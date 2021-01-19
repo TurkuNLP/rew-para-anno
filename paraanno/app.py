@@ -89,7 +89,7 @@ def hello_world():
     for user, batches in all_batches.items():
         no_completed, no_left = 0, 0
         for batch in batches.values():
-            if batch.get_anno_stats[0]==batch.get_batch_len:
+            if (batch.get_anno_stats[0] + batch.get_anno_stats[1]) == batch.get_batch_len: # completed + skipped == total
                 no_completed += 1
             else:
                 no_left += 1
