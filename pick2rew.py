@@ -33,7 +33,11 @@ def yield_segments(fname):
     for i, segment in enumerate(data): # one 15min segment of a movie
         # d1, d2, sim, (updated, annotation)
         annotation = segment.get("annotation", None)
+        if segment.get("locked", False) == True:
+            print(f'Segment {i} locked, annotator {segment.get("annotator")}, skipping')
+            continue
         if "annotation" in segment: # if segment not annotated, skip
+                    
                 yield i, movie_meta, segment
         
 def get_document_text(db_name, table, doc_id):
